@@ -82,6 +82,18 @@ export interface GetTeamsResponse {
   stats: TeamStats;
 }
 
+export interface SquadPlayer {
+  playerId: string;
+  playerName: string;
+  role: string;
+  nationality: string;
+  category: string;
+  basePrice: number;
+  rating: number | null;
+  keyPoints: number;
+  purchasePrice: number;
+}
+
 export interface CreateTeamPayload {
   teamName: string;
   collegeName: string;
@@ -200,6 +212,21 @@ export const teamService = {
 
     const json = await res.json();
     return (json.data || []).map(mapApiMember);
+  },
+
+  /**
+   * Fetch admin-only squad of purchased players for a team
+   */
+  async getTeamSquad(teamId: string): Promise<SquadPlayer[]> {
+    const res = await fetch(`${API_BASE}/${encodeURIComponent(teamId)}/squad`, {
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.message || `Failed to fetch team squad (status ${res.status})`);
+    }
+    const json = await res.json();
+    return json.data || [];
   },
 
   /**

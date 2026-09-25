@@ -25,6 +25,8 @@ const DEFAULT_TEAMS: AuctionTeam[] = [
 export const LiveAuction: React.FC = () => {
   const { user } = useAuth();
   const isVolunteer = String(user?.role || '').toLowerCase() === 'volunteer';
+  const isAdmin = String(user?.role || '').toLowerCase() === 'admin';
+  // Auctioneer bids on behalf of teams; Admin manages flow but does NOT bid
 
   // === REAL BACKEND STATE ===
   const [sessionState, setSessionState] = useState<LiveAuctionState | null>(null);
@@ -97,6 +99,29 @@ export const LiveAuction: React.FC = () => {
       setTimerSeconds(seconds);
     },
   });
+
+  // Client-side countdown timer: decrements every second when bidding is active
+  useEffect(() => {
+    const stage = sessionState?.stageState || 'INITIAL';
+    const isBiddingActive =
+      stage === 'BIDDING' ||
+      stage === 'GOING_ONCE' ||
+      stage === 'GOING_TWICE';
+
+    if (!isBiddingActive) return;
+
+    const countdown = setInterval(() => {
+      setTimerSeconds((prev) => {
+        if (prev <= 0) {
+          clearInterval(countdown);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(countdown);
+  }, [sessionState?.stageState, sessionState?.timerSeconds]);
 
   // --- Initial Data Load from Backend API ---
   const loadLiveAuction = useCallback(async () => {
@@ -282,7 +307,9 @@ export const LiveAuction: React.FC = () => {
   }, []);
 
   const hasBids = bidHistory.length > 0;
-  const canBid = !isVolunteer && (auctionState === 'BIDDING' || auctionState === 'GOING_ONCE' || auctionState === 'GOING_TWICE');
+  // Admin manages flow only — does NOT place bids on behalf of teams
+  // Only Auctioneer role can place bids
+  const canBid = !isVolunteer && !isAdmin && (auctionState === 'BIDDING' || auctionState === 'GOING_ONCE' || auctionState === 'GOING_TWICE');
   const canUndo = !isVolunteer && bidHistory.length > 0;
   const canSold = !isVolunteer && hasBids && (auctionState === 'BIDDING' || auctionState === 'GOING_ONCE' || auctionState === 'GOING_TWICE');
 
@@ -405,6 +432,7 @@ export const LiveAuction: React.FC = () => {
         canUndo={canUndo}
         canSold={canSold}
         isVolunteer={isVolunteer}
+        isAdmin={isAdmin}
       />
 
       {/* Signature SOLD Celebration Overlay */}

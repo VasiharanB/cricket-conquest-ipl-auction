@@ -211,6 +211,40 @@ export class TeamService {
   }
 
   /**
+   * Fetch purchased squad players for a team (Admin use only)
+   */
+  static async getTeamSquad(teamId: string): Promise<any[]> {
+    const team = await this.getTeamById(teamId);
+    if (!team) {
+      const err: any = new Error(`Team '${teamId}' not found`);
+      err.statusCode = 404;
+      throw err;
+    }
+
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT p.player_id, p.player_name, p.role, p.nationality, p.player_category,
+              p.base_price, p.rating, p.key_points, pp.purchase_price
+       FROM player_purchases pp
+       JOIN players p ON pp.player_id = p.id
+       WHERE pp.team_id = ? AND pp.is_undone = FALSE
+       ORDER BY pp.id ASC`,
+      [team.id]
+    );
+
+    return (rows as any[]).map((p) => ({
+      playerId: p.player_id,
+      playerName: p.player_name,
+      role: p.role,
+      nationality: p.nationality,
+      category: p.player_category,
+      basePrice: Number(p.base_price),
+      rating: p.rating ? Number(p.rating) : null,
+      keyPoints: Number(p.key_points || 0),
+      purchasePrice: Number(p.purchase_price),
+    }));
+  }
+
+  /**
    * Register a new team with participants in an atomic MySQL transaction
    */
   static async createTeam(input: CreateTeamInput): Promise<DbTeam> {

@@ -134,4 +134,14 @@ export class TeamController {
       next(error);
     }
   }
+
+  static async getTeamSquad(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const teamId = String(req.params.teamId || '');
+      const squad = await TeamService.getTeamSquad(teamId);
+      res.json({ success: true, data: squad });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

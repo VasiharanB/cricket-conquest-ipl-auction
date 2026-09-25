@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, X, Loader2, AlertCircle, RefreshCw, CheckCircle2, Filter, Pencil, Trash2, ShieldCheck, Eye } from 'lucide-react';
+import { Search, X, Loader2, AlertCircle, RefreshCw, CheckCircle2, Filter, Pencil, Trash2, ShieldCheck, Eye, Users } from 'lucide-react';
 import { Badge, Card, Button, ProgressBar, Modal, TeamEditModal } from '../../components';
 import { useAuth } from '../../contexts/AuthContext';
 import { teamService } from '../../services/teamService';
-import type { TeamRecord, TeamStats } from '../../services/teamService';
+import type { TeamRecord, TeamStats, SquadPlayer } from '../../services/teamService';
 import './TeamsManagement.css';
 
 export const TeamsManagement: React.FC = () => {
@@ -39,6 +39,10 @@ export const TeamsManagement: React.FC = () => {
   const [editingTeam, setEditingTeam] = useState<TeamRecord | null>(null);
   const [deletingTeam, setDeletingTeam] = useState<TeamRecord | null>(null);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+
+  // Admin squad viewer
+  const [teamSquad, setTeamSquad] = useState<SquadPlayer[]>([]);
+  const [isLoadingSquad, setIsLoadingSquad] = useState<boolean>(false);
 
   // Debounce search
   useEffect(() => {
@@ -126,6 +130,7 @@ export const TeamsManagement: React.FC = () => {
       await teamService.deleteTeam(deletingTeam.teamId);
       if (selectedTeam?.teamId === deletingTeam.teamId) {
         setSelectedTeam(null);
+        setTeamSquad([]);
       }
       setToastMessage(`Team '${deletingTeam.teamName}' (${deletingTeam.teamId}) deleted successfully.`);
       setDeletingTeam(null);
@@ -137,6 +142,22 @@ export const TeamsManagement: React.FC = () => {
       setIsDeleting(false);
     }
   };
+
+  // Load squad when Admin selects a team
+  const handleSelectTeam = useCallback(async (team: TeamRecord | null) => {
+    setSelectedTeam(team);
+    setTeamSquad([]);
+    if (!team || !isAdmin) return;
+    setIsLoadingSquad(true);
+    try {
+      const squad = await teamService.getTeamSquad(team.teamId);
+      setTeamSquad(squad);
+    } catch {
+      setTeamSquad([]);
+    } finally {
+      setIsLoadingSquad(false);
+    }
+  }, [isAdmin]);
 
   const statusBadge = (status: string) => {
     const map: Record<string, 'confirmed' | 'pending' | 'checked-in' | 'waitlisted'> = {
@@ -271,7 +292,7 @@ export const TeamsManagement: React.FC = () => {
                       <tr
                         key={t.teamId}
                         className={`${selectedTeam?.teamId === t.teamId ? 'data-table__row--selected' : ''}`}
-                        onClick={() => setSelectedTeam(t)}
+                        onClick={() => handleSelectTeam(t)}
                         style={{ cursor: 'pointer' }}
                         title="Click to view team details & roster"
                       >
@@ -323,7 +344,7 @@ export const TeamsManagement: React.FC = () => {
                               title={`View ${t.teamName}`}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setSelectedTeam(t);
+                                handleSelectTeam(t);
                               }}
                               aria-label={`View ${t.teamName}`}
                             >
@@ -379,7 +400,7 @@ export const TeamsManagement: React.FC = () => {
                       <Trash2 size={16} />
                     </button>
                   )}
-                  <button className="team-detail__close" onClick={() => setSelectedTeam(null)} aria-label="Close detail panel">
+                  <button className="team-detail__close" onClick={() => { setSelectedTeam(null); setTeamSquad([]); }} aria-label="Close detail panel">
                     <X size={18} />
                   </button>
                 </div>
@@ -495,6 +516,43 @@ export const TeamsManagement: React.FC = () => {
                     color="blue"
                   />
                 </div>
+
+                {/* Admin-only Purchased Squad */}
+                {isAdmin && (
+                  <div className="team-detail__section" style={{ marginTop: 12 }}>
+                    <span className="team-detail__section-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Users size={14} /> Purchased Squad ({isLoadingSquad ? '...' : teamSquad.length} players)
+                    </span>
+                    {isLoadingSquad ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0', color: '#94A3B8', fontSize: 13 }}>
+                        <Loader2 size={14} className="animate-spin" /> Loading squad...
+                      </div>
+                    ) : teamSquad.length === 0 ? (
+                      <div style={{ color: '#64748B', fontSize: 13, fontStyle: 'italic', padding: '8px 0' }}>
+                        No players purchased yet.
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
+                        {teamSquad.map((p, i) => (
+                          <div key={p.playerId} style={{
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            padding: '6px 10px', background: 'rgba(255,255,255,0.03)',
+                            border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, fontSize: 12,
+                          }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                              <span style={{ fontWeight: 600, color: '#F8FAFC' }}>{i + 1}. {p.playerName}</span>
+                              <span style={{ color: '#94A3B8' }}>{p.role} · {p.nationality}</span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+                              <span style={{ color: '#00F59B', fontWeight: 700 }}>₹{p.purchasePrice.toFixed(2)} Cr</span>
+                              <span style={{ color: '#FFB800', fontSize: 11 }}>🔑 {p.keyPoints} pts</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Panel Actions */}
                 {(canEdit || canDelete) && (

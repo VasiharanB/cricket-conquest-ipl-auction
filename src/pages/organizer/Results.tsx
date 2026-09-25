@@ -281,7 +281,7 @@ export const Results: React.FC = () => {
             {isPublished ? '🏆 Official Tournament Standings' : 'Live Team Auction Status (Points Sealed)'}
           </h2>
           <span style={{ fontSize: 12, color: '#94A3B8' }}>
-            Score Formula: Total Key Points + (Purse × 0.5)
+            Rank by: Key Points · Tiebreak: Lower Purse Spent
           </span>
         </div>
         <div className="table-scroll">

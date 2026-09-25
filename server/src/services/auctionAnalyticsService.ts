@@ -162,8 +162,10 @@ export class AuctionAnalyticsService {
       const calculatedRemaining = startingPurse - totalSpent;
       const totalKeyPoints = players.reduce((sum, p) => sum + p.keyPoints, 0);
 
-      // Score formula: Total Key Points + Remaining Purse * 0.5 (efficiency bonus)
-      const totalScore = Number((totalKeyPoints + calculatedRemaining * 0.5).toFixed(2));
+      // Score = Total Key Points only (pure merit)
+      // Tiebreaker 1: lower totalSpent (spent less = more efficient)
+      // Tiebreaker 2: higher average rating
+      const totalScore = totalKeyPoints;
 
       const roleCounts = {
         batsman: players.filter((p) => p.role.toLowerCase().includes('bat')).length,
@@ -192,8 +194,12 @@ export class AuctionAnalyticsService {
       });
     }
 
-    // Sort by totalScore desc, then squadRating desc
-    standings.sort((a, b) => b.totalScore - a.totalScore || b.squadRating - a.squadRating);
+    // Sort: 1) Most Key Points first, 2) Lower purse spent (tie-break), 3) Higher avg rating
+    standings.sort((a, b) => {
+      if (b.totalKeyPoints !== a.totalKeyPoints) return b.totalKeyPoints - a.totalKeyPoints;
+      if (a.totalSpent !== b.totalSpent) return a.totalSpent - b.totalSpent; // lower spent = winner on tie
+      return b.squadRating - a.squadRating;
+    });
 
     return {
       isPublished,

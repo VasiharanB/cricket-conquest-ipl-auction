@@ -33,6 +33,7 @@ interface AuctionControlsProps {
   canUndo: boolean;
   canSold: boolean;
   isVolunteer?: boolean;
+  isAdmin?: boolean;
 }
 
 export const AuctionControls: React.FC<AuctionControlsProps> = ({
@@ -54,6 +55,7 @@ export const AuctionControls: React.FC<AuctionControlsProps> = ({
   canUndo,
   canSold,
   isVolunteer,
+  isAdmin,
 }) => {
   const isPaused = auctionState === 'PAUSED';
   const isSoldOrUnsold = auctionState === 'SOLD' || auctionState === 'UNSOLD';
@@ -79,33 +81,41 @@ export const AuctionControls: React.FC<AuctionControlsProps> = ({
   return (
     <div className="auction-controls-dock">
       <div className="auction-controls-dock__inner">
-        {/* Team Selector for Bidding */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 12 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase' }}>Bidder:</span>
-          <select
-            value={selectedTeamId || ''}
-            onChange={(e) => onSelectTeam(e.target.value)}
-            disabled={!canBid || isPaused}
-            style={{
-              background: '#1E293B',
-              color: '#F8FAFC',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: 8,
-              padding: '6px 10px',
-              fontSize: 13,
-              outline: 'none',
-              maxWidth: 160,
-              cursor: 'pointer',
-            }}
-          >
-            <option value="" disabled>Select Team...</option>
-            {teams.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name} (₹{t.remainingPurse} Cr)
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Team Selector for Bidding — hidden for Admin (Admin manages flow, not bids) */}
+        {!isAdmin && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 12 }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase' }}>Bidder:</span>
+            <select
+              value={selectedTeamId || ''}
+              onChange={(e) => onSelectTeam(e.target.value)}
+              disabled={!canBid || isPaused}
+              style={{
+                background: '#1E293B',
+                color: '#F8FAFC',
+                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: 8,
+                padding: '6px 10px',
+                fontSize: 13,
+                outline: 'none',
+                maxWidth: 160,
+                cursor: 'pointer',
+              }}
+            >
+              <option value="" disabled>Select Team...</option>
+              {teams.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name} (₹{t.remainingPurse} Cr)
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        {isAdmin && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 12, padding: '5px 12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 8 }}>
+            <ShieldCheck size={14} style={{ color: '#F87171' }} />
+            <span style={{ fontSize: 12, fontWeight: 600, color: '#F87171' }}>Admin — Manage Flow Only</span>
+          </div>
+        )}
 
         {/* GROUP 1: Bid Manipulation */}
         <div className="auction-controls-dock__group auction-controls-dock__group--bids">
@@ -118,7 +128,7 @@ export const AuctionControls: React.FC<AuctionControlsProps> = ({
               <Play size={16} fill="currentColor" />
               <span>Start Bidding</span>
             </button>
-          ) : (
+          ) : !isAdmin ? (
             <div className="ctrl-btn-chips">
               <button
                 className="ctrl-chip-btn"
@@ -157,7 +167,7 @@ export const AuctionControls: React.FC<AuctionControlsProps> = ({
                 <span>+2.00</span>
               </button>
             </div>
-          )}
+          ) : null}
 
           {/* Undo Action */}
           <button

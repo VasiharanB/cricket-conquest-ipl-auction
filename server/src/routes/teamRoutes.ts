@@ -23,6 +23,7 @@ router.post('/', TeamController.createTeam);
 router.post('/register', TeamController.createTeam);
 router.patch('/:teamId/status', authenticateToken, requireRole('Admin'), TeamController.updateRegistrationStatus);
 router.put('/:teamId', authenticateToken, requireRole('Admin'), TeamController.updateTeam);
+router.get('/:teamId/squad', authenticateToken, requireRole('Admin'), TeamController.getTeamSquad);
 router.delete('/:teamId', authenticateToken, requireRole('Admin'), TeamController.deleteTeam);
 
 export default router;
