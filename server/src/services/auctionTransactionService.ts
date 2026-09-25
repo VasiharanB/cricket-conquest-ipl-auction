@@ -1,6 +1,7 @@
 import { RowDataPacket, ResultSetHeader, PoolConnection } from 'mysql2/promise';
 import { pool } from '../db/pool.js';
 import { AuctionSessionService, LiveAuctionState } from './auctionSessionService.js';
+import { AuctionTimerManager } from './auctionTimerManager.js';
 import { auctionWsManager } from '../websocket/auctionWs.js';
 
 export class AuctionTransactionService {
@@ -141,7 +142,10 @@ export class AuctionTransactionService {
       connection.release();
     }
 
-    const updatedState = await AuctionSessionService.getAuctionState(sessionId);
+    AuctionTimerManager.stopTimer(sessionId);
+    AuctionSessionService.invalidateCache(sessionId);
+
+    const updatedState = await AuctionSessionService.getAuctionState(sessionId, true);
     auctionWsManager.broadcast({
       type: 'PLAYER_SOLD',
       payload: { state: updatedState },
@@ -222,7 +226,10 @@ export class AuctionTransactionService {
       connection.release();
     }
 
-    const updatedState = await AuctionSessionService.getAuctionState(sessionId);
+    AuctionTimerManager.stopTimer(sessionId);
+    AuctionSessionService.invalidateCache(sessionId);
+
+    const updatedState = await AuctionSessionService.getAuctionState(sessionId, true);
     auctionWsManager.broadcast({
       type: 'PLAYER_UNSOLD',
       payload: { state: updatedState },
@@ -338,7 +345,10 @@ export class AuctionTransactionService {
       connection.release();
     }
 
-    const updatedState = await AuctionSessionService.getAuctionState(sessionId);
+    AuctionTimerManager.stopTimer(sessionId);
+    AuctionSessionService.invalidateCache(sessionId);
+
+    const updatedState = await AuctionSessionService.getAuctionState(sessionId, true);
     auctionWsManager.broadcast({
       type: 'SALE_UNDONE',
       payload: { state: updatedState },

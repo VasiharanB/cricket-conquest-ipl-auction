@@ -23,7 +23,7 @@ export const NextPlayerPreview: React.FC<NextPlayerPreviewProps> = ({
   }
 
   return (
-    <div className="next-player-card" onClick={onSkipToNext} title="Upcoming player in auction queue">
+    <div className="next-player-card" title="Upcoming player in auction queue">
       <div className="next-player-card__header">
         <div className="next-player-card__badge">
           <SkipForward size={12} />
@@ -52,6 +52,35 @@ export const NextPlayerPreview: React.FC<NextPlayerPreviewProps> = ({
             </span>
           </div>
         </div>
+
+        {onSkipToNext && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSkipToNext();
+            }}
+            style={{
+              marginLeft: 'auto',
+              background: 'rgba(59, 130, 246, 0.15)',
+              border: '1px solid rgba(59, 130, 246, 0.4)',
+              color: '#60A5FA',
+              borderRadius: 6,
+              padding: '6px 10px',
+              fontSize: 11,
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              whiteSpace: 'nowrap',
+            }}
+            title="Bring this player to the stage"
+          >
+            <SkipForward size={12} />
+            <span>Bring to Stage</span>
+          </button>
+        )}
       </div>
     </div>
   );

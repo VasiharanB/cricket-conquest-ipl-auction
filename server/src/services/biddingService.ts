@@ -1,6 +1,7 @@
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 import { pool } from '../db/pool.js';
 import { AuctionSessionService, LiveAuctionState } from './auctionSessionService.js';
+import { AuctionTimerManager } from './auctionTimerManager.js';
 import { auctionWsManager } from '../websocket/auctionWs.js';
 
 export interface PlaceBidInput {
@@ -179,8 +180,12 @@ export class BiddingService {
       [sessionId, 'BID_PLACED', player.id, teamId, bidAmount]
     );
 
+    // Stop any active countdown timer and reset state to BIDDING
+    AuctionTimerManager.stopTimer(sessionId);
+    AuctionSessionService.invalidateCache(sessionId);
+
     // 10. Broadcast Real-Time Update
-    const updatedState = await AuctionSessionService.getAuctionState(sessionId);
+    const updatedState = await AuctionSessionService.getAuctionState(sessionId, true);
     auctionWsManager.broadcast({
       type: 'NEW_BID',
       payload: {

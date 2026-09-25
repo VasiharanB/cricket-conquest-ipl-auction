@@ -151,11 +151,15 @@ export const ParticipantAuctionRoom: React.FC = () => {
     timestamp: b.timestamp,
   }));
 
+  const hasOpeningBid = !!sessionState?.highestBidder && (sessionState?.bidHistory?.length || 0) > 0;
+
   const handlePlaceBid = async (increment: number) => {
     if (!profile || isBidding) return;
     setIsBidding(true);
     try {
-      const targetBid = +(currentBid + increment).toFixed(2);
+      const targetBid = hasOpeningBid
+        ? +(currentBid + increment).toFixed(2)
+        : Number(currentPlayer?.basePrice || currentBid);
       await participantService.placeBid(targetBid);
       showToast(`Bid placed for ₹${targetBid.toFixed(2)} Cr!`);
       const updatedProfile = await participantService.getProfile();
@@ -312,41 +316,66 @@ export const ParticipantAuctionRoom: React.FC = () => {
 
         {/* Quick Increment Bids */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button
-            type="button"
-            className="part-chip-bid"
-            onClick={() => handlePlaceBid(0.20)}
-            disabled={!canBid || isBidding}
-          >
-            +0.20 Cr
-          </button>
-          <button
-            type="button"
-            className="part-chip-bid"
-            onClick={() => handlePlaceBid(0.50)}
-            disabled={!canBid || isBidding}
-          >
-            +0.50 Cr
-          </button>
-          <button
-            type="button"
-            className="part-chip-bid"
-            onClick={() => handlePlaceBid(1.00)}
-            disabled={!canBid || isBidding}
-          >
-            +1.00 Cr
-          </button>
+          {!hasOpeningBid ? (
+            <button
+              type="button"
+              className="part-bid-btn"
+              style={{
+                background: 'linear-gradient(135deg, #00F59B 0%, #00B377 100%)',
+                color: '#050814',
+                fontWeight: 900,
+                fontSize: 15,
+                padding: '12px 24px',
+                minWidth: 260,
+                boxShadow: '0 0 25px rgba(0, 245, 155, 0.4)',
+                cursor: canBid && !isBidding ? 'pointer' : 'not-allowed',
+                letterSpacing: 0.5,
+              }}
+              onClick={() => handlePlaceBid(0)}
+              disabled={!canBid || isBidding}
+            >
+              <Gavel size={18} />
+              <span>BID BASE PRICE: ₹{Number(currentPlayer?.basePrice || 0).toFixed(2)} Cr</span>
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="part-chip-bid"
+                onClick={() => handlePlaceBid(0.20)}
+                disabled={!canBid || isBidding}
+              >
+                +0.20 Cr
+              </button>
+              <button
+                type="button"
+                className="part-chip-bid"
+                onClick={() => handlePlaceBid(0.50)}
+                disabled={!canBid || isBidding}
+              >
+                +0.50 Cr
+              </button>
+              <button
+                type="button"
+                className="part-chip-bid"
+                onClick={() => handlePlaceBid(1.00)}
+                disabled={!canBid || isBidding}
+              >
+                +1.00 Cr
+              </button>
 
-          {/* Primary Action Button */}
-          <button
-            type="button"
-            className="part-bid-btn"
-            onClick={() => handlePlaceBid(0.50)}
-            disabled={!canBid || isBidding}
-          >
-            <Gavel size={18} />
-            <span>{isMyTeamLeading ? 'HOLDING BID' : 'BID NOW (+0.50)'}</span>
-          </button>
+              {/* Primary Action Button */}
+              <button
+                type="button"
+                className="part-bid-btn"
+                onClick={() => handlePlaceBid(0.20)}
+                disabled={!canBid || isBidding}
+              >
+                <Gavel size={18} />
+                <span>{isMyTeamLeading ? 'HOLDING BID' : 'BID NOW (+0.20 Cr)'}</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 

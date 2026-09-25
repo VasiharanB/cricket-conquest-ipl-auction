@@ -103,10 +103,17 @@ export class ParticipantService {
    * Get full contestant team profile
    */
   static async getProfile(teamDbId: number): Promise<any> {
-    const [teamRows] = await pool.query<RowDataPacket[]>(
-      'SELECT * FROM teams WHERE id = ? LIMIT 1',
-      [teamDbId]
-    );
+    const [[teamRows], [members], [playersBought]] = await Promise.all([
+      pool.query<RowDataPacket[]>('SELECT * FROM teams WHERE id = ? LIMIT 1', [teamDbId]),
+      pool.query<RowDataPacket[]>('SELECT id, member_number, full_name, email, phone, is_captain FROM team_members WHERE team_id = ? ORDER BY member_number ASC', [teamDbId]),
+      pool.query<RowDataPacket[]>(
+        `SELECT p.id, p.player_id, p.player_name, p.role, p.player_category, p.rating, pp.purchase_price
+         FROM player_purchases pp
+         JOIN players p ON pp.player_id = p.id
+         WHERE pp.team_id = ? AND pp.is_undone = FALSE`,
+        [teamDbId]
+      ),
+    ]);
 
     if (teamRows.length === 0) {
       const err: any = new Error('Team not found');
@@ -115,19 +122,6 @@ export class ParticipantService {
     }
 
     const team = teamRows[0];
-
-    const [members] = await pool.query<RowDataPacket[]>(
-      'SELECT id, member_number, full_name, email, phone, is_captain FROM team_members WHERE team_id = ? ORDER BY member_number ASC',
-      [teamDbId]
-    );
-
-    const [playersBought] = await pool.query<RowDataPacket[]>(
-      `SELECT p.id, p.player_id, p.player_name, p.role, p.player_category, p.rating, pp.purchase_price
-       FROM player_purchases pp
-       JOIN players p ON pp.player_id = p.id
-       WHERE pp.team_id = ? AND pp.is_undone = FALSE`,
-      [teamDbId]
-    );
 
     return {
       id: team.id,

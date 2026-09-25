@@ -257,11 +257,24 @@ export const AuctionControls: React.FC<AuctionControlsProps> = ({
             <span>{isPaused ? 'Resume' : 'Pause'}</span>
           </button>
 
-          {/* Next Player */}
+          {/* Next Player - Manual Trigger by Admin/Auctioneer */}
           <button
-            className="ctrl-btn ctrl-btn--next"
+            className={`ctrl-btn ctrl-btn--next ${isSoldOrUnsold ? 'ctrl-btn--next-prominent' : ''}`}
             onClick={onNextPlayer}
-            title="Transition to next player in queue"
+            disabled={isPaused || isVolunteer}
+            style={
+              isSoldOrUnsold
+                ? {
+                    background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+                    color: '#FFFFFF',
+                    borderColor: '#60A5FA',
+                    boxShadow: '0 0 22px rgba(37, 99, 235, 0.6)',
+                    fontWeight: 800,
+                    animation: 'pulse 1.8s infinite',
+                  }
+                : undefined
+            }
+            title={isVolunteer ? 'Volunteer mode: view only' : 'Bring next player from queue to auction stage'}
           >
             <SkipForward size={15} />
             <span>Next Player</span>

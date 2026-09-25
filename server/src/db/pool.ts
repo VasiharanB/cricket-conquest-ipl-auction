@@ -9,7 +9,7 @@ export const pool = process.env.DATABASE_URL || process.env.MYSQL_URL
   ? mysql.createPool({
       uri: process.env.DATABASE_URL || process.env.MYSQL_URL,
       waitForConnections: true,
-      connectionLimit: 10,
+      connectionLimit: 25,
       queueLimit: 0,
       enableKeepAlive: true,
       keepAliveInitialDelay: 0,
@@ -23,7 +23,7 @@ export const pool = process.env.DATABASE_URL || process.env.MYSQL_URL
       password: process.env.DB_PASSWORD || '',
       database: process.env.DB_NAME || 'cricket_conquest',
       waitForConnections: true,
-      connectionLimit: 10,
+      connectionLimit: 25,
       queueLimit: 0,
       enableKeepAlive: true,
       keepAliveInitialDelay: 0,

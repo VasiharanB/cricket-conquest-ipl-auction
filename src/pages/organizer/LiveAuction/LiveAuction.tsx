@@ -116,8 +116,26 @@ export const LiveAuction: React.FC = () => {
     // When Going Once or Going Twice is selected, start the timer countdown
     const countdown = setInterval(() => {
       setTimerSeconds((prev) => {
-        if (prev <= 0) {
+        if (prev <= 1) {
           clearInterval(countdown);
+          // Safeguard progression if server WS had any latency
+          if (!isVolunteer) {
+            if (stage === 'GOING_ONCE') {
+              auctionService.setStage('GOING_TWICE').then(handleApplyState).catch(() => {});
+            } else if (stage === 'GOING_TWICE') {
+              if (sessionState?.highestBidder) {
+                auctionService.sellPlayer().then((st) => {
+                  setShowSoldOverlay(true);
+                  handleApplyState(st);
+                }).catch(() => {});
+              } else {
+                auctionService.markUnsold().then((st) => {
+                  setShowUnsoldOverlay(true);
+                  handleApplyState(st);
+                }).catch(() => {});
+              }
+            }
+          }
           return 0;
         }
         return prev - 1;
@@ -125,7 +143,7 @@ export const LiveAuction: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(countdown);
-  }, [sessionState?.stageState, sessionState?.timerSeconds]);
+  }, [sessionState?.stageState, sessionState?.timerSeconds, sessionState?.highestBidder, isVolunteer, handleApplyState]);
 
   // --- Initial Data Load from Backend API ---
   const loadLiveAuction = useCallback(async () => {
@@ -217,7 +235,10 @@ export const LiveAuction: React.FC = () => {
     }
 
     try {
-      const targetBid = +(currentBid + increment).toFixed(2);
+      const hasOpeningBid = !!sessionState?.highestBidder && (sessionState?.bidHistory?.length || 0) > 0;
+      const targetBid = hasOpeningBid
+        ? +(currentBid + increment).toFixed(2)
+        : Number(currentPlayer?.basePrice || currentBid);
       const state = await auctionService.placeBid(selectedTeamId, targetBid);
       handleApplyState(state);
     } catch (err: any) {
@@ -448,7 +469,6 @@ export const LiveAuction: React.FC = () => {
           finalBid={currentBid}
           onAnimationComplete={() => {
             setShowSoldOverlay(false);
-            handleNextPlayer();
           }}
         />
       )}
@@ -459,7 +479,6 @@ export const LiveAuction: React.FC = () => {
           player={currentPlayer}
           onAnimationComplete={() => {
             setShowUnsoldOverlay(false);
-            handleNextPlayer();
           }}
         />
       )}
