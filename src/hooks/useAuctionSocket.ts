@@ -107,15 +107,33 @@ export function useAuctionSocket(options: UseAuctionSocketOptions = {}) {
   useEffect(() => {
     connect();
 
-    // Heartbeat ping every 25 seconds
+    // Heartbeat ping every 25 seconds when connected
     const pingInterval = setInterval(() => {
       if (socketRef.current?.readyState === WebSocket.OPEN) {
         socketRef.current.send(JSON.stringify({ type: 'PING' }));
       }
     }, 25000);
 
+    // Fallback polling when socket is disconnected or connecting
+    const fallbackPollInterval = setInterval(async () => {
+      if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
+        try {
+          const res = await fetch('/api/auction/state');
+          if (res.ok) {
+            const json = await res.json();
+            if (json.success && json.data) {
+              optionsRef.current.onStateUpdate?.(json.data);
+            }
+          }
+        } catch {
+          // Ignore polling errors while connecting
+        }
+      }
+    }, 2000);
+
     return () => {
       clearInterval(pingInterval);
+      clearInterval(fallbackPollInterval);
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
       if (socketRef.current) socketRef.current.close();
     };
