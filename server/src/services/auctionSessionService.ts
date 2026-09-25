@@ -297,12 +297,13 @@ export class AuctionSessionService {
     // If no player is currently selected, pick the first queued player
     if (!session[0].current_player_id) {
       await this.nextPlayer(sessionId);
-    } else {
-      await pool.query(
-        "UPDATE auction_sessions SET status = 'ACTIVE', state_stage = 'PLAYER_READY' WHERE id = ?",
-        [sessionId]
-      );
     }
+
+    // Transition session to ACTIVE and BIDDING
+    await pool.query(
+      "UPDATE auction_sessions SET status = 'ACTIVE', state_stage = 'BIDDING' WHERE id = ?",
+      [sessionId]
+    );
 
     await pool.query(
       'INSERT INTO auction_events (session_id, event_type) VALUES (?, ?)',
@@ -375,7 +376,7 @@ export class AuctionSessionService {
    */
   static async nextPlayer(sessionId: number): Promise<LiveAuctionState> {
     // Find next queued player
-    const [nextRows] = await pool.query<RowDataPacket[]>(
+    let [nextRows] = await pool.query<RowDataPacket[]>(
       `SELECT q.id AS queueId, q.player_id, p.base_price
        FROM auction_queue q
        JOIN players p ON q.player_id = p.id
@@ -384,6 +385,27 @@ export class AuctionSessionService {
        LIMIT 1`,
       [sessionId]
     );
+
+    if (nextRows.length === 0) {
+      // Check if queue was empty because it was never initialized
+      const [qCount] = await pool.query<RowDataPacket[]>(
+        'SELECT COUNT(*) as count FROM auction_queue WHERE session_id = ?',
+        [sessionId]
+      );
+      if (Number(qCount[0]?.count || 0) === 0) {
+        await this.initializeQueue(sessionId);
+        const [reloaded] = await pool.query<RowDataPacket[]>(
+          `SELECT q.id AS queueId, q.player_id, p.base_price
+           FROM auction_queue q
+           JOIN players p ON q.player_id = p.id
+           WHERE q.session_id = ? AND q.status = 'QUEUED'
+           ORDER BY q.queue_order ASC
+           LIMIT 1`,
+          [sessionId]
+        );
+        nextRows = reloaded;
+      }
+    }
 
     if (nextRows.length === 0) {
       // All players processed

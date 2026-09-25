@@ -47,15 +47,18 @@ export class AuthService {
     // Update last login timestamp
     await pool.query('UPDATE organizers SET last_login = CURRENT_TIMESTAMP WHERE id = ?', [organizer.id]);
 
+    const rawRole = String(organizer.role || 'Volunteer');
+    const normalizedRole = (rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase()) as AuthUser['role'];
+
     const user: AuthUser = {
       id: organizer.id,
       username: organizer.username,
       email: organizer.email,
-      role: organizer.role,
+      role: normalizedRole,
     };
 
     const secret = process.env.JWT_SECRET || 'zentrix26_cricket_conquest_super_secure_jwt_secret_key_2026';
-    const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
+    const expiresIn = process.env.JWT_EXPIRES_IN || '30d';
 
     const token = jwt.sign(user, secret, { expiresIn: expiresIn as any });
 

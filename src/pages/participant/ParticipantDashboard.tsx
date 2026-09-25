@@ -20,8 +20,53 @@ export const ParticipantDashboard: React.FC = () => {
   const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
   const [helpMessage, setHelpMessage] = useState<string>('');
   const [helpStatus, setHelpStatus] = useState<string | null>(null);
+  const [squadOrder, setSquadOrder] = useState<string[]>([]);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!profile) return;
+    const key = `zentrix26_squad_order_${profile.teamId}`;
+    const saved = localStorage.getItem(key);
+    let order: string[] = [];
+    if (saved) {
+      try {
+        order = JSON.parse(saved);
+      } catch {
+        order = [];
+      }
+    }
+    const currentIds = (profile.squad || []).map((p) => p.player_id);
+    const combined = [
+      ...order.filter((id) => currentIds.includes(id)),
+      ...currentIds.filter((id) => !order.includes(id)),
+    ];
+    setSquadOrder(combined);
+  }, [profile?.teamId, profile?.squad]);
+
+  const handleMove = (fromIndex: number, toIndex: number) => {
+    if (!profile || toIndex < 0 || toIndex >= squadOrder.length) return;
+    const next = [...squadOrder];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    setSquadOrder(next);
+    localStorage.setItem(`zentrix26_squad_order_${profile.teamId}`, JSON.stringify(next));
+  };
+
+  const sortedSquad = React.useMemo(() => {
+    if (!profile) return [];
+    if (squadOrder.length === 0) return profile.squad;
+    const map = new Map(profile.squad.map((p) => [p.player_id, p]));
+    const result: typeof profile.squad = [];
+    for (const id of squadOrder) {
+      const p = map.get(id);
+      if (p) result.push(p);
+    }
+    for (const p of profile.squad) {
+      if (!squadOrder.includes(p.player_id)) result.push(p);
+    }
+    return result;
+  }, [profile, squadOrder]);
 
   // Load team profile
   const loadProfile = useCallback(async () => {
@@ -268,36 +313,106 @@ export const ParticipantDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Squad Bought in Auction */}
+        {/* Squad Bought in Auction & Lineup Positioning */}
         <div style={{ background: 'rgba(13, 23, 42, 0.7)', borderRadius: 20, border: '1px solid rgba(255, 255, 255, 0.08)', overflow: 'hidden' }}>
-          <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>Your Acquired Squad</h2>
-            <span style={{ fontSize: 13, color: '#94A3B8' }}>{profile.squad.length} Players</span>
+          <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <div>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>Your Acquired Squad & Playing Order</h2>
+              <p style={{ margin: '4px 0 0', fontSize: 13, color: '#94A3B8' }}>
+                Position your players in the exact batting and playing XI order you want using the ▲ Up and ▼ Down buttons.
+              </p>
+            </div>
+            <span style={{ fontSize: 13, color: '#00F59B', fontWeight: 700, background: 'rgba(0, 245, 155, 0.1)', padding: '4px 12px', borderRadius: 999 }}>
+              {profile.squad.length} Players
+            </span>
           </div>
 
           <table className="part-squad-table">
             <thead>
               <tr>
+                <th style={{ width: 120 }}>Lineup #</th>
                 <th>Player ID</th>
                 <th>Name</th>
                 <th>Role</th>
                 <th>Category</th>
                 <th>Price Paid</th>
+                <th style={{ textAlign: 'center', width: 150 }}>Position Order</th>
               </tr>
             </thead>
             <tbody>
-              {profile.squad.map((p) => (
-                <tr key={p.id}>
-                  <td style={{ fontFamily: 'monospace', color: '#00F59B' }}>{p.player_id}</td>
-                  <td style={{ fontWeight: 700 }}>{p.player_name}</td>
-                  <td>{p.role}</td>
-                  <td>{p.player_category}</td>
-                  <td style={{ fontWeight: 800, color: '#38BDF8' }}>₹{Number(p.purchase_price).toFixed(2)} Cr</td>
-                </tr>
-              ))}
-              {profile.squad.length === 0 && (
+              {sortedSquad.map((p, idx) => {
+                const isPlayingXI = idx < 11;
+                return (
+                  <tr key={p.id}>
+                    <td>
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          padding: '3px 8px',
+                          borderRadius: 6,
+                          fontSize: 12,
+                          fontWeight: 800,
+                          background: isPlayingXI ? 'rgba(0, 245, 155, 0.15)' : 'rgba(148, 163, 184, 0.12)',
+                          color: isPlayingXI ? '#00F59B' : '#94A3B8',
+                          border: isPlayingXI ? '1px solid rgba(0, 245, 155, 0.3)' : '1px solid rgba(148, 163, 184, 0.2)',
+                        }}
+                      >
+                        #{idx + 1} {isPlayingXI ? '(Playing XI)' : '(Bench)'}
+                      </span>
+                    </td>
+                    <td style={{ fontFamily: 'monospace', color: '#00F59B' }}>{p.player_id}</td>
+                    <td style={{ fontWeight: 700 }}>{p.player_name}</td>
+                    <td>{p.role}</td>
+                    <td>{p.player_category}</td>
+                    <td style={{ fontWeight: 800, color: '#38BDF8' }}>₹{Number(p.purchase_price).toFixed(2)} Cr</td>
+                    <td style={{ textAlign: 'center' }}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                        <button
+                          type="button"
+                          onClick={() => handleMove(idx, idx - 1)}
+                          disabled={idx === 0}
+                          title="Move up in batting / playing order"
+                          style={{
+                            background: idx === 0 ? 'rgba(255,255,255,0.03)' : 'rgba(56, 189, 248, 0.15)',
+                            border: idx === 0 ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(56, 189, 248, 0.3)',
+                            color: idx === 0 ? '#475569' : '#38BDF8',
+                            borderRadius: 6,
+                            padding: '4px 10px',
+                            cursor: idx === 0 ? 'not-allowed' : 'pointer',
+                            fontSize: 12,
+                            fontWeight: 700,
+                          }}
+                        >
+                          ▲ Up
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleMove(idx, idx + 1)}
+                          disabled={idx === sortedSquad.length - 1}
+                          title="Move down in batting / playing order"
+                          style={{
+                            background: idx === sortedSquad.length - 1 ? 'rgba(255,255,255,0.03)' : 'rgba(56, 189, 248, 0.15)',
+                            border: idx === sortedSquad.length - 1 ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(56, 189, 248, 0.3)',
+                            color: idx === sortedSquad.length - 1 ? '#475569' : '#38BDF8',
+                            borderRadius: 6,
+                            padding: '4px 10px',
+                            cursor: idx === sortedSquad.length - 1 ? 'not-allowed' : 'pointer',
+                            fontSize: 12,
+                            fontWeight: 700,
+                          }}
+                        >
+                          ▼ Down
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+              {sortedSquad.length === 0 && (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '36px', color: '#64748B' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '36px', color: '#64748B' }}>
                     You haven't bought any players yet. When the auction starts, enter the auction room to place bids!
                   </td>
                 </tr>

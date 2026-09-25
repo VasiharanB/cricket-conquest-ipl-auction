@@ -26,7 +26,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
     return <Navigate to="/organizer/login" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && user) {
+    const userRole = String(user.role || '').toLowerCase();
+    const isAllowed = allowedRoles.some((r) => String(r).toLowerCase() === userRole);
+    if (!isAllowed) {
     return (
       <div style={{
         display: 'flex',
@@ -81,6 +84,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
       </div>
     );
   }
+}
 
   return <>{children}</>;
 };

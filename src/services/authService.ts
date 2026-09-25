@@ -75,8 +75,12 @@ export const authService = {
       });
 
       if (!res.ok) {
-        this.clearSession();
-        return null;
+        if (res.status === 401) {
+          this.clearSession();
+          return null;
+        }
+        // For transient 5xx or gateway timeouts, retain the locally cached session
+        return this.getUser();
       }
 
       const json = await res.json();
@@ -84,9 +88,10 @@ export const authService = {
         localStorage.setItem(USER_KEY, JSON.stringify(json.user));
         return json.user;
       }
-      return null;
+      return this.getUser();
     } catch {
-      return null;
+      // Retain local session on network error
+      return this.getUser();
     }
   },
 };

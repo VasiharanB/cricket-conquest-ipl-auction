@@ -21,15 +21,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     async function verifyAuth() {
       const storedToken = authService.getToken();
-      if (storedToken) {
-        const verifiedUser = await authService.getMe();
-        if (verifiedUser) {
-          setUser(verifiedUser);
-          setToken(storedToken);
-        } else {
-          setUser(null);
-          setToken(null);
+      const storedUser = authService.getUser();
+
+      if (storedToken && storedUser) {
+        setUser(storedUser);
+        setToken(storedToken);
+        try {
+          const verifiedUser = await authService.getMe();
+          if (verifiedUser) {
+            setUser(verifiedUser);
+          } else if (!authService.getToken()) {
+            // Token was explicitly cleared as 401 Unauthorized
+            setUser(null);
+            setToken(null);
+          }
+        } catch {
+          // Keep cached session on network errors
         }
+      } else {
+        setUser(null);
+        setToken(null);
       }
       setIsLoading(false);
     }
@@ -49,9 +60,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(null);
   };
 
-  const hasRole = (...roles: ('Admin' | 'Auctioneer' | 'Volunteer')[]) => {
+  const hasRole = (...roles: ('Admin' | 'Auctioneer' | 'Volunteer' | string)[]) => {
     if (!user) return false;
-    return roles.includes(user.role);
+    const userRole = String(user.role || '').toLowerCase();
+    return roles.some((r) => String(r).toLowerCase() === userRole);
   };
 
   return (

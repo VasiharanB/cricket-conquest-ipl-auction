@@ -62,10 +62,10 @@ const ROLE_STYLE: Record<Role, React.CSSProperties> = {
 
 export const Sidebar: React.FC = () => {
   const { user, logout } = useAuth();
-  const role = user?.role as Role | undefined;
+  const roleNorm = (user?.role || '').toLowerCase();
 
-  const visibleItems = NAV_ITEMS.filter(item =>
-    !item.allowedRoles || (role && item.allowedRoles.includes(role))
+  const visibleItems = NAV_ITEMS.filter((item) =>
+    !item.allowedRoles || item.allowedRoles.some((r) => r.toLowerCase() === roleNorm)
   );
 
   return (
@@ -100,7 +100,11 @@ export const Sidebar: React.FC = () => {
               </span>
               <span style={{
                 fontSize: 10, padding: '1px 6px', borderRadius: 4, width: 'fit-content', marginTop: 2,
-                ...ROLE_STYLE[role as Role] || {},
+                ...(roleNorm === 'admin'
+                  ? ROLE_STYLE.Admin
+                  : roleNorm === 'auctioneer'
+                  ? ROLE_STYLE.Auctioneer
+                  : ROLE_STYLE.Volunteer),
               }}>
                 {user.role}
               </span>
@@ -117,7 +121,7 @@ export const Sidebar: React.FC = () => {
       )}
 
       {/* Volunteer read-only notice */}
-      {role === 'Volunteer' && (
+      {roleNorm === 'volunteer' && (
         <div style={{
           margin: '4px 12px 8px',
           padding: '8px 12px',

@@ -28,9 +28,16 @@ export function useAuctionSocket(options: UseAuctionSocketOptions = {}) {
     }
 
     const envWsUrl = (import.meta as any).env?.VITE_WS_URL;
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.port === '5173' ? 'localhost:5000' : window.location.host;
-    const wsUrl = envWsUrl || `${protocol}//${host}/ws/auction`;
+    let wsUrl: string;
+    if (envWsUrl) {
+      wsUrl = envWsUrl;
+    } else if (window.location.host.includes('vercel.app')) {
+      wsUrl = 'wss://cricket-conquest-backend.onrender.com/ws/auction';
+    } else {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.port === '5173' ? 'localhost:5000' : window.location.host;
+      wsUrl = `${protocol}//${host}/ws/auction`;
+    }
 
     try {
       const ws = new WebSocket(wsUrl);

@@ -1,11 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, X, Loader2, AlertCircle, RefreshCw, CheckCircle2, Filter, Pencil, Trash2 } from 'lucide-react';
+import { Search, X, Loader2, AlertCircle, RefreshCw, CheckCircle2, Filter, Pencil, Trash2, ShieldCheck, Eye } from 'lucide-react';
 import { Badge, Card, Button, ProgressBar, Modal, TeamEditModal } from '../../components';
+import { useAuth } from '../../contexts/AuthContext';
 import { teamService } from '../../services/teamService';
 import type { TeamRecord, TeamStats } from '../../services/teamService';
 import './TeamsManagement.css';
 
 export const TeamsManagement: React.FC = () => {
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole('Admin');
+  const isAuctioneer = hasRole('Auctioneer');
+  const isVolunteer = hasRole('Volunteer') || (!isAdmin && !isAuctioneer);
+  const canEdit = isAdmin || isAuctioneer;
+  const canDelete = isAdmin;
   const [teams, setTeams] = useState<TeamRecord[]>([]);
   const [stats, setStats] = useState<TeamStats>({
     registeredTeams: 0,
@@ -157,6 +164,25 @@ export const TeamsManagement: React.FC = () => {
         </div>
       </div>
 
+      {isVolunteer && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: '12px 18px',
+          background: 'rgba(56, 189, 248, 0.1)',
+          border: '1px solid rgba(56, 189, 248, 0.3)',
+          borderRadius: 10,
+          color: '#38BDF8',
+          fontSize: 13,
+          fontWeight: 500,
+          marginBottom: 18,
+        }}>
+          <ShieldCheck size={18} style={{ flexShrink: 0 }} />
+          <span>Volunteer Monitoring Mode: Read-only access to franchise team rosters and event check-in status. Actions are restricted.</span>
+        </div>
+      )}
+
       {toastMessage && (
         <div className="teams-mgmt__toast animate-slide-down">
           <CheckCircle2 size={18} />
@@ -229,7 +255,7 @@ export const TeamsManagement: React.FC = () => {
                     <th>Check-In</th>
                     <th>Purse</th>
                     <th>Players</th>
-                    <th>Actions</th>
+                    <th>{isVolunteer ? 'Details' : 'Actions'}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -264,28 +290,46 @@ export const TeamsManagement: React.FC = () => {
                           className="teams-mgmt__actions-cell"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <button
-                            className="teams-mgmt__action-btn teams-mgmt__action-btn--edit"
-                            title={`Edit ${t.teamName}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setEditingTeam(t);
-                            }}
-                            aria-label={`Edit ${t.teamName}`}
-                          >
-                            <Pencil size={15} />
-                          </button>
-                          <button
-                            className="teams-mgmt__action-btn teams-mgmt__action-btn--delete"
-                            title={`Delete ${t.teamName}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeletingTeam(t);
-                            }}
-                            aria-label={`Delete ${t.teamName}`}
-                          >
-                            <Trash2 size={15} />
-                          </button>
+                          {canEdit && (
+                            <button
+                              className="teams-mgmt__action-btn teams-mgmt__action-btn--edit"
+                              title={`Edit ${t.teamName}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingTeam(t);
+                              }}
+                              aria-label={`Edit ${t.teamName}`}
+                            >
+                              <Pencil size={15} />
+                            </button>
+                          )}
+                          {canDelete && (
+                            <button
+                              className="teams-mgmt__action-btn teams-mgmt__action-btn--delete"
+                              title={`Delete ${t.teamName}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeletingTeam(t);
+                              }}
+                              aria-label={`Delete ${t.teamName}`}
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          )}
+                          {isVolunteer && (
+                            <button
+                              className="teams-mgmt__action-btn"
+                              style={{ color: '#38BDF8', borderColor: 'rgba(56, 189, 248, 0.3)' }}
+                              title={`View ${t.teamName}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedTeam(t);
+                              }}
+                              aria-label={`View ${t.teamName}`}
+                            >
+                              <Eye size={15} />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))
@@ -314,23 +358,27 @@ export const TeamsManagement: React.FC = () => {
                   <span className="data-table__mono text-xs text-secondary">{selectedTeam.teamId}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <button
-                    className="team-detail__close"
-                    title="Edit Team"
-                    onClick={() => setEditingTeam(selectedTeam)}
-                    aria-label="Edit Team"
-                  >
-                    <Pencil size={16} />
-                  </button>
-                  <button
-                    className="team-detail__close"
-                    title="Delete Team"
-                    style={{ color: 'var(--color-danger)' }}
-                    onClick={() => setDeletingTeam(selectedTeam)}
-                    aria-label="Delete Team"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  {canEdit && (
+                    <button
+                      className="team-detail__close"
+                      title="Edit Team"
+                      onClick={() => setEditingTeam(selectedTeam)}
+                      aria-label="Edit Team"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      className="team-detail__close"
+                      title="Delete Team"
+                      style={{ color: 'var(--color-danger)' }}
+                      onClick={() => setDeletingTeam(selectedTeam)}
+                      aria-label="Delete Team"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                   <button className="team-detail__close" onClick={() => setSelectedTeam(null)} aria-label="Close detail panel">
                     <X size={18} />
                   </button>
@@ -371,16 +419,18 @@ export const TeamsManagement: React.FC = () => {
                   <span className="team-detail__label">Registration</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     {statusBadge(selectedTeam.registrationStatus)}
-                    <select
-                      value={selectedTeam.registrationStatus}
-                      onChange={(e) => handleStatusChange(selectedTeam, e.target.value)}
-                      className="teams-mgmt__status-select"
-                    >
-                      <option value="CONFIRMED">CONFIRMED</option>
-                      <option value="PENDING">PENDING</option>
-                      <option value="WAITLISTED">WAITLISTED</option>
-                      <option value="CANCELLED">CANCELLED</option>
-                    </select>
+                    {canEdit && (
+                      <select
+                        value={selectedTeam.registrationStatus}
+                        onChange={(e) => handleStatusChange(selectedTeam, e.target.value)}
+                        className="teams-mgmt__status-select"
+                      >
+                        <option value="CONFIRMED">CONFIRMED</option>
+                        <option value="PENDING">PENDING</option>
+                        <option value="WAITLISTED">WAITLISTED</option>
+                        <option value="CANCELLED">CANCELLED</option>
+                      </select>
+                    )}
                   </div>
                 </div>
 
@@ -388,15 +438,17 @@ export const TeamsManagement: React.FC = () => {
                   <span className="team-detail__label">Event Check-In</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     {checkInBadge(selectedTeam.checkInStatus)}
-                    <Button
-                      size="sm"
-                      variant={selectedTeam.checkInStatus === 'CHECKED_IN' ? 'outline' : 'primary'}
-                      onClick={() => handleToggleCheckIn(selectedTeam)}
-                      disabled={isUpdatingCheckIn}
-                      icon={isUpdatingCheckIn ? <Loader2 className="animate-spin" size={12} /> : undefined}
-                    >
-                      {selectedTeam.checkInStatus === 'CHECKED_IN' ? 'Undo' : 'Check In'}
-                    </Button>
+                    {canEdit && (
+                      <Button
+                        size="sm"
+                        variant={selectedTeam.checkInStatus === 'CHECKED_IN' ? 'outline' : 'primary'}
+                        onClick={() => handleToggleCheckIn(selectedTeam)}
+                        disabled={isUpdatingCheckIn}
+                        icon={isUpdatingCheckIn ? <Loader2 className="animate-spin" size={12} /> : undefined}
+                      >
+                        {selectedTeam.checkInStatus === 'CHECKED_IN' ? 'Undo' : 'Check In'}
+                      </Button>
+                    )}
                   </div>
                 </div>
 
@@ -445,26 +497,32 @@ export const TeamsManagement: React.FC = () => {
                 </div>
 
                 {/* Panel Actions */}
-                <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-2)' }}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    icon={<Pencil size={14} />}
-                    fullWidth
-                    onClick={() => setEditingTeam(selectedTeam)}
-                  >
-                    Edit Team
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    icon={<Trash2 size={14} />}
-                    style={{ color: 'var(--color-danger)' }}
-                    onClick={() => setDeletingTeam(selectedTeam)}
-                  >
-                    Delete
-                  </Button>
-                </div>
+                {(canEdit || canDelete) && (
+                  <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-2)' }}>
+                    {canEdit && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        icon={<Pencil size={14} />}
+                        fullWidth={!canDelete}
+                        onClick={() => setEditingTeam(selectedTeam)}
+                      >
+                        Edit Team
+                      </Button>
+                    )}
+                    {canDelete && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        icon={<Trash2 size={14} />}
+                        style={{ color: 'var(--color-danger)' }}
+                        onClick={() => setDeletingTeam(selectedTeam)}
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             </Card>
           </div>

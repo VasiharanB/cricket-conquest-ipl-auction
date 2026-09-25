@@ -24,7 +24,7 @@ const DEFAULT_TEAMS: AuctionTeam[] = [
 
 export const LiveAuction: React.FC = () => {
   const { user } = useAuth();
-  const isVolunteer = user?.role === 'Volunteer';
+  const isVolunteer = String(user?.role || '').toLowerCase() === 'volunteer';
 
   // === REAL BACKEND STATE ===
   const [sessionState, setSessionState] = useState<LiveAuctionState | null>(null);

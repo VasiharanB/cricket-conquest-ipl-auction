@@ -15,6 +15,8 @@ import {
   X,
   Pencil,
   Trash2,
+  ShieldCheck,
+  Eye,
 } from 'lucide-react';
 import { Badge, Card, Button, StatCard, Modal, PlayerImportModal, PlayerDetailModal, PlayerEditModal } from '../../components';
 import { useAuth } from '../../contexts/AuthContext';
@@ -25,6 +27,9 @@ import './PlayerDatabase.css';
 export const PlayerDatabase: React.FC = () => {
   const { hasRole } = useAuth();
   const isAdmin = hasRole('Admin');
+  const isAuctioneer = hasRole('Auctioneer');
+  const isVolunteer = hasRole('Volunteer') || (!isAdmin && !isAuctioneer);
+  const canEdit = isAdmin || isAuctioneer;
 
   const [players, setPlayers] = useState<PlayerRecord[]>([]);
   const [stats, setStats] = useState<PlayerStats>({ total: 0, available: 0, sold: 0, unsold: 0 });
@@ -256,15 +261,37 @@ export const PlayerDatabase: React.FC = () => {
               DELETE ENTIRE LIST
             </Button>
           )}
-          <Button
-            variant="primary"
-            icon={<Upload size={16} />}
-            onClick={() => setIsImportModalOpen(true)}
-          >
-            IMPORT PLAYERS
-          </Button>
+          {canEdit && (
+            <Button
+              variant="primary"
+              icon={<Upload size={16} />}
+              onClick={() => setIsImportModalOpen(true)}
+            >
+              IMPORT PLAYERS
+            </Button>
+          )}
         </div>
       </div>
+
+      {/* Volunteer Mode Informational Banner */}
+      {isVolunteer && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: '12px 18px',
+          background: 'rgba(56, 189, 248, 0.1)',
+          border: '1px solid rgba(56, 189, 248, 0.3)',
+          borderRadius: 10,
+          color: '#38BDF8',
+          fontSize: 13,
+          fontWeight: 500,
+          marginBottom: 18,
+        }}>
+          <ShieldCheck size={18} style={{ flexShrink: 0 }} />
+          <span>Volunteer Monitoring Mode: Read-only access to player pool. Import, edit, and deletion features are restricted.</span>
+        </div>
+      )}
 
       {/* Success Notification Banner */}
       {successToast && (
@@ -439,7 +466,7 @@ export const PlayerDatabase: React.FC = () => {
                 <th>Rating</th>
                 <th>Status</th>
                 <th>Sold For</th>
-                <th className="player-db__th-actions">Actions</th>
+                <th className="player-db__th-actions">{isVolunteer ? 'Details' : 'Actions'}</th>
               </tr>
             </thead>
             <tbody>
@@ -489,14 +516,16 @@ export const PlayerDatabase: React.FC = () => {
                       className="player-db__actions-cell"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <button
-                        className="player-db__action-btn player-db__action-btn--edit"
-                        title={`Edit ${p.name}`}
-                        onClick={() => setPlayerToEdit(p)}
-                        aria-label={`Edit ${p.name}`}
-                      >
-                        <Pencil size={15} />
-                      </button>
+                      {canEdit && (
+                        <button
+                          className="player-db__action-btn player-db__action-btn--edit"
+                          title={`Edit ${p.name}`}
+                          onClick={() => setPlayerToEdit(p)}
+                          aria-label={`Edit ${p.name}`}
+                        >
+                          <Pencil size={15} />
+                        </button>
+                      )}
                       {isAdmin && (
                         <button
                           className="player-db__action-btn player-db__action-btn--delete"
@@ -505,6 +534,17 @@ export const PlayerDatabase: React.FC = () => {
                           aria-label={`Delete ${p.name}`}
                         >
                           <Trash2 size={15} />
+                        </button>
+                      )}
+                      {isVolunteer && (
+                        <button
+                          className="player-db__action-btn"
+                          style={{ color: '#38BDF8', borderColor: 'rgba(56, 189, 248, 0.3)' }}
+                          title={`View details for ${p.name}`}
+                          onClick={() => setSelectedPlayer(p)}
+                          aria-label={`View ${p.name}`}
+                        >
+                          <Eye size={15} />
                         </button>
                       )}
                     </td>

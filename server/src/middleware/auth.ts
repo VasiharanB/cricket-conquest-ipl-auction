@@ -44,7 +44,7 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
   });
 }
 
-export function requireRole(...allowedRoles: ('Admin' | 'Auctioneer' | 'Volunteer')[]) {
+export function requireRole(...allowedRoles: ('Admin' | 'Auctioneer' | 'Volunteer' | string)[]) {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({
@@ -54,7 +54,10 @@ export function requireRole(...allowedRoles: ('Admin' | 'Auctioneer' | 'Voluntee
       return;
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    const userRole = String(req.user.role || '').toLowerCase();
+    const normalizedAllowed = allowedRoles.map(r => String(r).toLowerCase());
+
+    if (!normalizedAllowed.includes(userRole)) {
       res.status(403).json({
         success: false,
         message: `Forbidden. Role '${req.user.role}' is not authorized for this action. Required: [${allowedRoles.join(', ')}]`,
