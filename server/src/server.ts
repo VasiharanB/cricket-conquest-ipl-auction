@@ -12,10 +12,6 @@ const PORT = Number(process.env.PORT) || 5000;
 
 async function startServer() {
   try {
-    await testDbConnection();
-    await seedOrganizers();
-    await seedPlayersAndTeams();
-
     const server = http.createServer(app);
     auctionWsManager.init(server);
 
@@ -26,6 +22,15 @@ async function startServer() {
     server.listen(PORT, '0.0.0.0', () => {
       console.log(`[SERVER] Cricket Conquest API & WebSocket running on http://0.0.0.0:${PORT}`);
     });
+
+    // Asynchronously connect to DB and seed
+    try {
+      await testDbConnection();
+      await seedOrganizers();
+      await seedPlayersAndTeams();
+    } catch (dbErr: any) {
+      console.warn('[SERVER DB WARNING] Database initialization warning:', dbErr.message);
+    }
 
     const shutdown = async (signal: string) => {
       console.log(`\n[SERVER] Received ${signal}. Shutting down gracefully...`);
