@@ -81,7 +81,7 @@ export const PlayerDatabase: React.FC = () => {
 
     try {
       const response = await playerService.getPlayers({
-        limit: 200, // retrieve full pool for client filtering/listing
+        limit: 500, // retrieve full pool for client filtering/listing
         search: debouncedSearch,
         role: roleFilter,
         nationality: natFilter,

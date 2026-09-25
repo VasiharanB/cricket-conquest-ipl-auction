@@ -48,11 +48,11 @@ function App() {
             <Route path="history" element={<AuctionHistory />} />
             <Route path="results" element={<Results />} />
 
-            {/* Admin + Auctioneer only */}
+            {/* Admin + Auctioneer + Volunteer (monitoring) */}
             <Route
               path="monitor"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'Auctioneer']}>
+                <ProtectedRoute allowedRoles={['Admin', 'Auctioneer', 'Volunteer']}>
                   <WatchdogMonitor />
                 </ProtectedRoute>
               }

@@ -381,9 +381,6 @@ export const LiveAuction: React.FC = () => {
           highestBidderName={highestBidderName}
           onSelectTeam={(team) => {
             setSelectedTeamId(team.id);
-            if (canBid) {
-              handleIncreaseBid(0.5);
-            }
           }}
         />
       </main>

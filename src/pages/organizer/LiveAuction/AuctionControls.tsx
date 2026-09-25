@@ -57,6 +57,11 @@ export const AuctionControls: React.FC<AuctionControlsProps> = ({
 }) => {
   const isPaused = auctionState === 'PAUSED';
   const isSoldOrUnsold = auctionState === 'SOLD' || auctionState === 'UNSOLD';
+  const isBidding = auctionState === 'BIDDING';
+  const isGoingOnce = auctionState === 'GOING_ONCE';
+  const isGoingTwice = auctionState === 'GOING_TWICE';
+  const isInBiddingFlow = isBidding || isGoingOnce || isGoingTwice;
+  const hasPlayer = auctionState !== 'INITIAL' && auctionState !== 'PLAYER_READY';
 
   if (isVolunteer) {
     return (
@@ -172,10 +177,10 @@ export const AuctionControls: React.FC<AuctionControlsProps> = ({
         <div className="auction-controls-dock__group auction-controls-dock__group--calls">
           <button
             className={`ctrl-btn ctrl-btn--call ${
-              auctionState === 'GOING_ONCE' ? 'ctrl-btn--call-active' : ''
+              isGoingOnce ? 'ctrl-btn--call-active' : ''
             }`}
             onClick={onGoingOnce}
-            disabled={!canBid || isPaused}
+            disabled={isPaused || !isInBiddingFlow || isVolunteer}
             title="Announce: Going once"
           >
             <AlertCircle size={15} />
@@ -184,10 +189,10 @@ export const AuctionControls: React.FC<AuctionControlsProps> = ({
 
           <button
             className={`ctrl-btn ctrl-btn--call-twice ${
-              auctionState === 'GOING_TWICE' ? 'ctrl-btn--call-twice-active' : ''
+              isGoingTwice ? 'ctrl-btn--call-twice-active' : ''
             }`}
             onClick={onGoingTwice}
-            disabled={!canBid || isPaused}
+            disabled={isPaused || !isInBiddingFlow || isVolunteer}
             title="Announce: Going twice"
           >
             <AlertTriangle size={15} />
@@ -214,7 +219,7 @@ export const AuctionControls: React.FC<AuctionControlsProps> = ({
           <button
             className="ctrl-btn ctrl-btn--unsold"
             onClick={onMarkUnsold}
-            disabled={isSoldOrUnsold || isPaused}
+            disabled={isPaused || !hasPlayer || isSoldOrUnsold || isVolunteer}
             title="Mark player as UNSOLD"
           >
             <X size={15} />

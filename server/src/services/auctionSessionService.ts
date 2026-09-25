@@ -421,17 +421,20 @@ export class AuctionSessionService {
     const next = nextRows[0];
     const initialBid = Number(next.base_price);
 
-    // Update queue status
+    // Mark previous CURRENT queue items as QUEUED so we can set the new one
+    await pool.query("UPDATE auction_queue SET status = 'QUEUED' WHERE session_id = ? AND status = 'CURRENT'", [sessionId]);
+
+    // Update queue status for the next player
     await pool.query("UPDATE auction_queue SET status = 'CURRENT' WHERE id = ?", [next.queueId]);
 
-    // Update session
+    // Update session — auto-advance to BIDDING so auctioneer doesn't need to click Start again
     await pool.query(
       `UPDATE auction_sessions 
        SET current_player_id = ?,
            current_bid = ?,
            highest_bidder_team_id = NULL,
            status = 'ACTIVE',
-           state_stage = 'PLAYER_READY',
+           state_stage = 'BIDDING',
            timer_seconds = 15
        WHERE id = ?`,
       [next.player_id, initialBid, sessionId]

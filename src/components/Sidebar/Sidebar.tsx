@@ -41,8 +41,8 @@ const NAV_ITEMS: NavItem[] = [
     icon: ShieldAlert,
     label: 'Watchdog Monitor',
     end: false,
-    allowedRoles: ['Admin', 'Auctioneer'],
-    badge: 'Admin+',
+    allowedRoles: ['Admin', 'Auctioneer', 'Volunteer'],
+    badge: 'Monitor',
   },
   {
     to: '/organizer/users',
