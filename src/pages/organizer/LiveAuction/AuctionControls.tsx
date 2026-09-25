@@ -1,8 +1,7 @@
 import React from 'react';
 import {
   Play,
-  Plus,
-  Undo2,
+  Users,
   X,
   SkipForward,
   Pause,
@@ -16,12 +15,9 @@ import type { AuctionUIState, AuctionTeam } from './types';
 
 interface AuctionControlsProps {
   auctionState: AuctionUIState;
-  teams: AuctionTeam[];
-  selectedTeamId: string | null;
-  onSelectTeam: (teamId: string) => void;
+  teams?: AuctionTeam[];
   onStartBidding: () => void;
-  onIncreaseBid: (increment: number) => void;
-  onUndoBid: () => void;
+  onOpenPlayerSelector: () => void;
   onUndoSale: () => void;
   onGoingOnce: () => void;
   onGoingTwice: () => void;
@@ -29,8 +25,6 @@ interface AuctionControlsProps {
   onMarkUnsold: () => void;
   onNextPlayer: () => void;
   onTogglePause: () => void;
-  canBid: boolean;
-  canUndo: boolean;
   canSold: boolean;
   isVolunteer?: boolean;
   isAdmin?: boolean;
@@ -38,12 +32,8 @@ interface AuctionControlsProps {
 
 export const AuctionControls: React.FC<AuctionControlsProps> = ({
   auctionState,
-  teams,
-  selectedTeamId,
-  onSelectTeam,
   onStartBidding,
-  onIncreaseBid,
-  onUndoBid,
+  onOpenPlayerSelector,
   onUndoSale,
   onGoingOnce,
   onGoingTwice,
@@ -51,11 +41,8 @@ export const AuctionControls: React.FC<AuctionControlsProps> = ({
   onMarkUnsold,
   onNextPlayer,
   onTogglePause,
-  canBid,
-  canUndo,
   canSold,
   isVolunteer,
-  isAdmin,
 }) => {
   const isPaused = auctionState === 'PAUSED';
   const isSoldOrUnsold = auctionState === 'SOLD' || auctionState === 'UNSOLD';
@@ -81,44 +68,8 @@ export const AuctionControls: React.FC<AuctionControlsProps> = ({
   return (
     <div className="auction-controls-dock">
       <div className="auction-controls-dock__inner">
-        {/* Team Selector for Bidding — hidden for Admin (Admin manages flow, not bids) */}
-        {!isAdmin && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 12 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase' }}>Bidder:</span>
-            <select
-              value={selectedTeamId || ''}
-              onChange={(e) => onSelectTeam(e.target.value)}
-              disabled={!canBid || isPaused}
-              style={{
-                background: '#1E293B',
-                color: '#F8FAFC',
-                border: '1px solid rgba(255,255,255,0.15)',
-                borderRadius: 8,
-                padding: '6px 10px',
-                fontSize: 13,
-                outline: 'none',
-                maxWidth: 160,
-                cursor: 'pointer',
-              }}
-            >
-              <option value="" disabled>Select Team...</option>
-              {teams.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name} (₹{t.remainingPurse} Cr)
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-        {isAdmin && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 12, padding: '5px 12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 8 }}>
-            <ShieldCheck size={14} style={{ color: '#F87171' }} />
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#F87171' }}>Admin — Manage Flow Only</span>
-          </div>
-        )}
-
-        {/* GROUP 1: Bid Manipulation */}
-        <div className="auction-controls-dock__group auction-controls-dock__group--bids">
+        {/* GROUP 1: Player Selection & Starting */}
+        <div className="auction-controls-dock__group">
           {auctionState === 'INITIAL' || auctionState === 'PLAYER_READY' ? (
             <button
               className="ctrl-btn ctrl-btn--start"
@@ -128,56 +79,25 @@ export const AuctionControls: React.FC<AuctionControlsProps> = ({
               <Play size={16} fill="currentColor" />
               <span>Start Bidding</span>
             </button>
-          ) : !isAdmin ? (
-            <div className="ctrl-btn-chips">
-              <button
-                className="ctrl-chip-btn"
-                onClick={() => onIncreaseBid(0.20)}
-                disabled={!canBid || isPaused || !selectedTeamId}
-                title="Increase bid by 0.20 Cr"
-              >
-                <Plus size={12} />
-                <span>+0.20</span>
-              </button>
-              <button
-                className="ctrl-chip-btn ctrl-chip-btn--primary"
-                onClick={() => onIncreaseBid(0.50)}
-                disabled={!canBid || isPaused || !selectedTeamId}
-                title="Increase bid by 0.50 Cr"
-              >
-                <Plus size={12} />
-                <span>+0.50</span>
-              </button>
-              <button
-                className="ctrl-chip-btn"
-                onClick={() => onIncreaseBid(1.00)}
-                disabled={!canBid || isPaused || !selectedTeamId}
-                title="Increase bid by 1.00 Cr"
-              >
-                <Plus size={12} />
-                <span>+1.00</span>
-              </button>
-              <button
-                className="ctrl-chip-btn"
-                onClick={() => onIncreaseBid(2.00)}
-                disabled={!canBid || isPaused || !selectedTeamId}
-                title="Increase bid by 2.00 Cr"
-              >
-                <Plus size={12} />
-                <span>+2.00</span>
-              </button>
-            </div>
           ) : null}
 
-          {/* Undo Action */}
+          {/* Select Any Player from Pool */}
           <button
-            className="ctrl-btn ctrl-btn--undo"
-            onClick={onUndoBid}
-            disabled={!canUndo || isPaused}
-            title="Undo last bid"
+            type="button"
+            className="ctrl-btn"
+            onClick={onOpenPlayerSelector}
+            disabled={isPaused || isVolunteer}
+            style={{
+              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(37, 99, 235, 0.15) 100%)',
+              border: '1px solid rgba(59, 130, 246, 0.45)',
+              color: '#93C5FD',
+              fontWeight: 700,
+              gap: 7,
+            }}
+            title="Browse and select ANY player from the database to auction"
           >
-            <Undo2 size={14} />
-            <span>Undo Bid</span>
+            <Users size={16} color="#60A5FA" />
+            <span>Select Player</span>
           </button>
         </div>
 
@@ -274,7 +194,7 @@ export const AuctionControls: React.FC<AuctionControlsProps> = ({
                   }
                 : undefined
             }
-            title={isVolunteer ? 'Volunteer mode: view only' : 'Bring next player from queue to auction stage'}
+            title={isVolunteer ? 'Volunteer mode: view only' : 'Bring next queued player to auction stage'}
           >
             <SkipForward size={15} />
             <span>Next Player</span>

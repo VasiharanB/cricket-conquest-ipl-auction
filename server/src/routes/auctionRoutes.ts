@@ -15,6 +15,7 @@ router.post('/pause', authenticateToken, requireRole('Admin', 'Auctioneer'), Auc
 router.post('/resume', authenticateToken, requireRole('Admin', 'Auctioneer'), AuctionController.resume);
 router.post('/stage', authenticateToken, requireRole('Admin', 'Auctioneer'), AuctionController.setStage);
 router.post('/next-player', authenticateToken, requireRole('Admin', 'Auctioneer'), AuctionController.nextPlayer);
+router.post('/select-player', authenticateToken, requireRole('Admin', 'Auctioneer'), AuctionController.selectPlayer);
 router.post('/bid', authenticateToken, requireRole('Admin', 'Auctioneer'), AuctionController.placeBid);
 router.post('/sold', authenticateToken, requireRole('Admin', 'Auctioneer'), AuctionController.sell);
 router.post('/unsold', authenticateToken, requireRole('Admin', 'Auctioneer'), AuctionController.unsold);

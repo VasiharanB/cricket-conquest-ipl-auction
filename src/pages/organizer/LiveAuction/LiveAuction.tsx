@@ -7,6 +7,7 @@ import { TeamPurseStrip } from './TeamPurseStrip';
 import { AuctionControls } from './AuctionControls';
 import { SoldOverlay } from './SoldOverlay';
 import { UnsoldOverlay } from './UnsoldOverlay';
+import { PlayerSelectorModal } from './PlayerSelectorModal';
 import { DemoControls } from './DemoControls';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { auctionService, type LiveAuctionState } from '../../../services/auctionService';
@@ -39,6 +40,7 @@ export const LiveAuction: React.FC = () => {
   // === OVERLAYS & UI MODES ===
   const [showSoldOverlay, setShowSoldOverlay] = useState<boolean>(false);
   const [showUnsoldOverlay, setShowUnsoldOverlay] = useState<boolean>(false);
+  const [showPlayerSelector, setShowPlayerSelector] = useState<boolean>(false);
   const [showDemoPanel, setShowDemoPanel] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [timerSeconds, setTimerSeconds] = useState<number>(15);
@@ -228,21 +230,14 @@ export const LiveAuction: React.FC = () => {
     }
   };
 
-  const handleIncreaseBid = async (increment: number) => {
-    if (!selectedTeamId) {
-      showToast('Please select a bidding team first');
-      return;
-    }
-
+  const handleSelectPlayer = async (player: any) => {
     try {
-      const hasOpeningBid = !!sessionState?.highestBidder && (sessionState?.bidHistory?.length || 0) > 0;
-      const targetBid = hasOpeningBid
-        ? +(currentBid + increment).toFixed(2)
-        : Number(currentPlayer?.basePrice || currentBid);
-      const state = await auctionService.placeBid(selectedTeamId, targetBid);
+      const state = await auctionService.selectPlayer(player.id);
       handleApplyState(state);
+      showToast(`Player ${player.name} brought to stage!`);
     } catch (err: any) {
-      showToast(err.message);
+      showToast(err.message || 'Failed to select player');
+      throw err;
     }
   };
 
@@ -332,10 +327,6 @@ export const LiveAuction: React.FC = () => {
   }, []);
 
   const hasBids = bidHistory.length > 0;
-  // Admin manages flow only — does NOT place bids on behalf of teams
-  // Only Auctioneer role can place bids
-  const canBid = !isVolunteer && !isAdmin && (auctionState === 'BIDDING' || auctionState === 'GOING_ONCE' || auctionState === 'GOING_TWICE');
-  const canUndo = !isVolunteer && bidHistory.length > 0;
   const canSold = !isVolunteer && hasBids && (auctionState === 'BIDDING' || auctionState === 'GOING_ONCE' || auctionState === 'GOING_TWICE');
 
   return (
@@ -420,7 +411,8 @@ export const LiveAuction: React.FC = () => {
           <aside className="live-auction-side-col">
             <NextPlayerPreview
               player={nextPlayer}
-              onSkipToNext={handleNextPlayer}
+              onSkipToNext={!isVolunteer ? handleNextPlayer : undefined}
+              onOpenPlayerSelector={!isVolunteer ? () => setShowPlayerSelector(true) : undefined}
             />
 
             <BidActivity bids={bidHistory} />
@@ -441,11 +433,8 @@ export const LiveAuction: React.FC = () => {
       <AuctionControls
         auctionState={auctionState}
         teams={teams}
-        selectedTeamId={selectedTeamId}
-        onSelectTeam={(id) => setSelectedTeamId(id)}
         onStartBidding={handleStartBidding}
-        onIncreaseBid={handleIncreaseBid}
-        onUndoBid={() => handleUndoSale()}
+        onOpenPlayerSelector={() => setShowPlayerSelector(true)}
         onUndoSale={handleUndoSale}
         onGoingOnce={handleGoingOnce}
         onGoingTwice={handleGoingTwice}
@@ -453,8 +442,6 @@ export const LiveAuction: React.FC = () => {
         onMarkUnsold={handleMarkUnsold}
         onNextPlayer={handleNextPlayer}
         onTogglePause={handleTogglePause}
-        canBid={canBid}
-        canUndo={canUndo}
         canSold={canSold}
         isVolunteer={isVolunteer}
         isAdmin={isAdmin}
@@ -483,19 +470,27 @@ export const LiveAuction: React.FC = () => {
         />
       )}
 
+      {/* Organizer Player Selector Modal */}
+      <PlayerSelectorModal
+        isOpen={showPlayerSelector}
+        onClose={() => setShowPlayerSelector(false)}
+        onSelectPlayer={handleSelectPlayer}
+        currentPlayerId={currentPlayer?.id}
+      />
+
       {/* Interactive Simulation / Demo Controls Drawer */}
       <DemoControls
         isOpen={showDemoPanel}
         onClose={() => setShowDemoPanel(false)}
         currentState={auctionState}
         onSetState={(st) => auctionService.setStage(st).then(handleApplyState)}
-        onSimulateBid={() => handleIncreaseBid(0.5)}
+        onSimulateBid={() => {}}
         onTriggerSold={handleMarkSold}
         onTriggerUnsold={handleMarkUnsold}
         onNextPlayer={handleNextPlayer}
         onResetAuction={() => handleUndoSale()}
         availablePlayers={currentPlayer ? [currentPlayer] : []}
-        onSelectPlayer={() => {}}
+        onSelectPlayer={(p) => handleSelectPlayer(p)}
         currentPlayerId={currentPlayer?.id}
       />
     </div>

@@ -196,6 +196,20 @@ export const auctionService = {
     return json.data;
   },
 
+  async selectPlayer(playerId: string | number, sessionId?: number): Promise<LiveAuctionState> {
+    const res = await fetch(`${API_BASE}/select-player`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authService.getAuthHeaders(),
+      },
+      body: JSON.stringify({ playerId, sessionId }),
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || 'Failed to select player for auction');
+    return json.data;
+  },
+
   async placeBid(teamId: string | number, bidAmount: number, sessionId?: number): Promise<LiveAuctionState> {
     const res = await fetch(`${API_BASE}/bid`, {
       method: 'POST',

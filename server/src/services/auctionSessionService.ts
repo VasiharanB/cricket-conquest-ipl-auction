@@ -509,6 +509,87 @@ export class AuctionSessionService {
   }
 
   /**
+   * Directly select ANY specific player from the pool and bring them to the auction stage
+   * Can be invoked by Admin or Auctioneer
+   */
+  static async selectPlayer(sessionId: number, playerId: string | number): Promise<LiveAuctionState> {
+    this.invalidateCache(sessionId);
+    AuctionTimerManager.stopTimer(sessionId);
+
+    // 1. Fetch player by ID or player_id (e.g. 'P001' or 1)
+    const isNum = typeof playerId === 'number' || /^\d+$/.test(String(playerId));
+    const [players] = await pool.query<RowDataPacket[]>(
+      isNum
+        ? 'SELECT id, player_id, player_name, base_price, status FROM players WHERE id = ? OR player_id = ? LIMIT 1'
+        : 'SELECT id, player_id, player_name, base_price, status FROM players WHERE player_id = ? LIMIT 1',
+      isNum ? [Number(playerId), String(playerId)] : [String(playerId)]
+    );
+
+    if (players.length === 0) {
+      const err: any = new Error(`Player with ID '${playerId}' not found`);
+      err.statusCode = 404;
+      throw err;
+    }
+
+    const player = players[0];
+
+    if (player.status !== 'AVAILABLE') {
+      const err: any = new Error(`Player '${player.player_name}' is not available (Status: ${player.status})`);
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const initialBid = Number(player.base_price);
+
+    // 2. Mark previous CURRENT queue items as QUEUED
+    await pool.query(
+      "UPDATE auction_queue SET status = 'QUEUED' WHERE session_id = ? AND status = 'CURRENT'",
+      [sessionId]
+    );
+
+    // 3. Check if player exists in queue, if not insert, else set status = CURRENT
+    const [existingQ] = await pool.query<RowDataPacket[]>(
+      'SELECT id FROM auction_queue WHERE session_id = ? AND player_id = ? LIMIT 1',
+      [sessionId, player.id]
+    );
+
+    if (existingQ.length > 0) {
+      await pool.query(
+        "UPDATE auction_queue SET status = 'CURRENT' WHERE id = ?",
+        [existingQ[0].id]
+      );
+    } else {
+      await pool.query(
+        "INSERT INTO auction_queue (session_id, player_id, queue_order, status, round_number) VALUES (?, ?, 0, 'CURRENT', 1)",
+        [sessionId, player.id]
+      );
+    }
+
+    // 4. Update session state
+    await pool.query(
+      `UPDATE auction_sessions 
+       SET current_player_id = ?,
+           current_bid = ?,
+           highest_bidder_team_id = NULL,
+           status = 'ACTIVE',
+           state_stage = 'BIDDING',
+           timer_seconds = 15
+       WHERE id = ?`,
+      [player.id, initialBid, sessionId]
+    );
+
+    // 5. Log event
+    await pool.query(
+      'INSERT INTO auction_events (session_id, event_type, player_id, amount) VALUES (?, ?, ?, ?)',
+      [sessionId, 'PLAYER_STARTED', player.id, initialBid]
+    );
+
+    const state = await this.getAuctionState(sessionId, true);
+    auctionWsManager.broadcast({ type: 'AUCTION_STATE_UPDATE', payload: state });
+    return state;
+  }
+
+  /**
    * Update timer seconds
    */
   static async setTimer(sessionId: number, seconds: number): Promise<void> {

@@ -66,6 +66,21 @@ export class AuctionController {
     }
   }
 
+  static async selectPlayer(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const sessionId = req.body.sessionId ? Number(req.body.sessionId) : await AuctionSessionService.getOrCreateActiveSession();
+      const { playerId } = req.body;
+      if (!playerId) {
+        res.status(400).json({ success: false, message: 'playerId is required' });
+        return;
+      }
+      const state = await AuctionSessionService.selectPlayer(sessionId, playerId);
+      res.json({ success: true, message: 'Player selected for auction', data: state });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async placeBid(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const sessionId = req.body.sessionId ? Number(req.body.sessionId) : await AuctionSessionService.getOrCreateActiveSession();
