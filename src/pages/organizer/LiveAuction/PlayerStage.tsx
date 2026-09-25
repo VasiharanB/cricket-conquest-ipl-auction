@@ -15,6 +15,7 @@ interface PlayerStageProps {
   hasBids: boolean;
   timerSeconds: number;
   isPaused: boolean;
+  hideRating?: boolean;
 }
 
 export const PlayerStage: React.FC<PlayerStageProps> = ({
@@ -26,6 +27,7 @@ export const PlayerStage: React.FC<PlayerStageProps> = ({
   hasBids,
   timerSeconds,
   isPaused,
+  hideRating = false,
 }) => {
   return (
     <section className="auction-player-stage">
@@ -47,7 +49,7 @@ export const PlayerStage: React.FC<PlayerStageProps> = ({
           </div>
 
           {/* Player Information (Name, Role, Nationality, Base Price) */}
-          <PlayerInfo player={player} />
+          <PlayerInfo player={player} hideRating={hideRating} />
 
           {/* Big Number Section: Current Bid Hero */}
           <div className="auction-player-stage__bidding-zone">

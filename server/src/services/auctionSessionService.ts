@@ -357,13 +357,20 @@ export class AuctionSessionService {
    * Set stage state (e.g. GOING_ONCE, GOING_TWICE, BIDDING)
    */
   static async setStageState(sessionId: number, stage: string): Promise<LiveAuctionState> {
-    await pool.query('UPDATE auction_sessions SET state_stage = ? WHERE id = ?', [stage, sessionId]);
-
-    if (stage === 'GOING_ONCE' || stage === 'GOING_TWICE') {
+    if (stage === 'GOING_ONCE') {
+      await pool.query('UPDATE auction_sessions SET state_stage = ?, timer_seconds = 15 WHERE id = ?', [stage, sessionId]);
       await pool.query(
         'INSERT INTO auction_events (session_id, event_type) VALUES (?, ?)',
         [sessionId, stage]
       );
+    } else {
+      await pool.query('UPDATE auction_sessions SET state_stage = ? WHERE id = ?', [stage, sessionId]);
+      if (stage === 'GOING_TWICE') {
+        await pool.query(
+          'INSERT INTO auction_events (session_id, event_type) VALUES (?, ?)',
+          [sessionId, stage]
+        );
+      }
     }
 
     const state = await this.getAuctionState(sessionId);

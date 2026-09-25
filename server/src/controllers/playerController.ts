@@ -6,6 +6,7 @@ export class PlayerController {
     try {
       const { page, limit, search, role, nationality, status } = req.query;
 
+      const isAdmin = (req as any).user?.role === 'Admin';
       const result = await PlayerService.getPlayers({
         page: page ? Number(page) : undefined,
         limit: limit !== undefined ? Number(limit) : 20,
@@ -13,6 +14,7 @@ export class PlayerController {
         role: role ? String(role) : undefined,
         nationality: nationality ? String(nationality) : undefined,
         status: status ? String(status) : undefined,
+        includeKeyPoints: isAdmin,
       });
 
       res.json({
@@ -37,6 +39,11 @@ export class PlayerController {
           message: `Player with ID '${playerId}' not found`,
         });
         return;
+      }
+
+      const isAdmin = (req as any).user?.role === 'Admin';
+      if (!isAdmin && player) {
+        delete (player as any).key_points;
       }
 
       res.json({

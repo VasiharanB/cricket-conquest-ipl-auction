@@ -357,4 +357,22 @@ export const teamService = {
 
     return true;
   },
+
+  /**
+   * Delete all empty teams (< 2 members) from MySQL
+   */
+  async cleanupEmptyTeams(): Promise<{ deletedCount: number }> {
+    const res = await fetch(`${API_BASE}/empty/cleanup`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.message || `Failed to clean empty teams (status ${res.status})`);
+    }
+
+    const json = await res.json();
+    return json.data;
+  },
 };

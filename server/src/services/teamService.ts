@@ -660,7 +660,7 @@ export class TeamService {
   }
 
   /**
-   * Delete a team and its members
+   * Delete a team and its members, cleaning up all FK relationships
    */
   static async deleteTeam(teamId: string): Promise<boolean> {
     const existing = await this.getTeamById(teamId);
@@ -670,11 +670,54 @@ export class TeamService {
       throw err;
     }
 
+    const teamDbId = existing.id;
+    await pool.query(
+      "UPDATE players SET status = 'AVAILABLE', sold_to_team_id = NULL, sold_price = NULL WHERE sold_to_team_id = ?",
+      [teamDbId]
+    );
+    await pool.query('DELETE FROM player_purchases WHERE team_id = ?', [teamDbId]);
+    await pool.query('DELETE FROM bids WHERE team_id = ?', [teamDbId]);
+    await pool.query('DELETE FROM auction_events WHERE team_id = ?', [teamDbId]);
+    await pool.query('DELETE FROM participant_activities WHERE team_id = ?', [teamDbId]);
+    await pool.query('UPDATE auction_sessions SET highest_bidder_team_id = NULL WHERE highest_bidder_team_id = ?', [teamDbId]);
+    await pool.query('DELETE FROM team_members WHERE team_id = ?', [teamDbId]);
+
     const [result] = await pool.query<ResultSetHeader>(
       'DELETE FROM teams WHERE id = ?',
-      [existing.id]
+      [teamDbId]
     );
 
     return result.affectedRows > 0;
+  }
+
+  /**
+   * Delete all teams that have fewer than 2 members (must have minimum 2 or 4 members)
+   */
+  static async deleteEmptyTeams(): Promise<{ deletedCount: number }> {
+    const [emptyTeams] = await pool.query<RowDataPacket[]>(`
+      SELECT t.id, t.team_id, t.team_name, COUNT(m.id) as member_count
+      FROM teams t
+      LEFT JOIN team_members m ON t.id = m.team_id
+      GROUP BY t.id, t.team_id, t.team_name
+      HAVING member_count < 2
+    `);
+
+    let deletedCount = 0;
+    for (const team of emptyTeams) {
+      const teamDbId = team.id;
+      await pool.query(
+        "UPDATE players SET status = 'AVAILABLE', sold_to_team_id = NULL, sold_price = NULL WHERE sold_to_team_id = ?",
+        [teamDbId]
+      );
+      await pool.query('DELETE FROM player_purchases WHERE team_id = ?', [teamDbId]);
+      await pool.query('DELETE FROM bids WHERE team_id = ?', [teamDbId]);
+      await pool.query('DELETE FROM auction_events WHERE team_id = ?', [teamDbId]);
+      await pool.query('DELETE FROM participant_activities WHERE team_id = ?', [teamDbId]);
+      await pool.query('UPDATE auction_sessions SET highest_bidder_team_id = NULL WHERE highest_bidder_team_id = ?', [teamDbId]);
+      await pool.query('DELETE FROM team_members WHERE team_id = ?', [teamDbId]);
+      await pool.query('DELETE FROM teams WHERE id = ?', [teamDbId]);
+      deletedCount++;
+    }
+    return { deletedCount };
   }
 }

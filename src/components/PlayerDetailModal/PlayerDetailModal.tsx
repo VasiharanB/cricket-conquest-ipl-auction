@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal } from '../Modal/Modal';
 import { Badge } from '../Badge/Badge';
+import { useAuth } from '../../contexts/AuthContext';
 import type { PlayerRecord } from '../../services/playerService';
 import './PlayerDetailModal.css';
 
@@ -15,6 +16,9 @@ export const PlayerDetailModal: React.FC<PlayerDetailModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'Admin';
+
   if (!player) return null;
 
   const roleColors: Record<string, string> = {
@@ -90,6 +94,15 @@ export const PlayerDetailModal: React.FC<PlayerDetailModalProps> = ({
                 : '—'}
             </span>
           </div>
+
+          {isAdmin && player.key_points !== undefined && player.key_points !== null && (
+            <div className="player-detail-modal__item">
+              <span className="player-detail-modal__label">Secret Key Points 🔑</span>
+              <span className="player-detail-modal__value" style={{ color: '#D97706', fontWeight: 800 }}>
+                {player.key_points} pts
+              </span>
+            </div>
+          )}
 
           <div className="player-detail-modal__item">
             <span className="player-detail-modal__label">Auction Status</span>

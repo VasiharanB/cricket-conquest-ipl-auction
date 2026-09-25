@@ -85,6 +85,30 @@ export const ParticipantAuctionRoom: React.FC = () => {
     },
   });
 
+  // Countdown timer for participants: only runs during GOING_ONCE and GOING_TWICE
+  // In normal BIDDING or INITIAL, resets to 15s and waits for Going Once
+  useEffect(() => {
+    const stage = sessionState?.stageState || 'INITIAL';
+    const isGoingCallActive = stage === 'GOING_ONCE' || stage === 'GOING_TWICE';
+
+    if (!isGoingCallActive) {
+      setTimerSeconds(sessionState?.timerSeconds || 15);
+      return;
+    }
+
+    const countdown = setInterval(() => {
+      setTimerSeconds((prev) => {
+        if (prev <= 0) {
+          clearInterval(countdown);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(countdown);
+  }, [sessionState?.stageState, sessionState?.timerSeconds]);
+
   const currentPlayer: AuctionPlayer | null = sessionState?.currentPlayer
     ? {
         id: sessionState.currentPlayer.id,
@@ -95,7 +119,7 @@ export const ParticipantAuctionRoom: React.FC = () => {
         playerCategory: sessionState.currentPlayer.playerCategory,
         basePrice: sessionState.currentPlayer.basePrice,
         status: sessionState.currentPlayer.status,
-        rating: sessionState.currentPlayer.rating,
+        rating: undefined, // Concealed from participant players
       }
     : null;
 
@@ -261,6 +285,7 @@ export const ParticipantAuctionRoom: React.FC = () => {
             hasBids={bidHistory.length > 0}
             timerSeconds={timerSeconds}
             isPaused={stageState === 'PAUSED'}
+            hideRating={true}
           />
 
           {/* Right Bid Feed */}

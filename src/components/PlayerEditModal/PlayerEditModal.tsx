@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Modal } from '../Modal/Modal';
 import { Button } from '../Button/Button';
+import { useAuth } from '../../contexts/AuthContext';
 import { playerService } from '../../services/playerService';
 import type { PlayerRecord } from '../../services/playerService';
 import './PlayerEditModal.css';
@@ -19,12 +20,16 @@ export const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'Admin';
+
   const [name, setName] = useState('');
   const [role, setRole] = useState('Batter');
   const [nationality, setNationality] = useState('India');
   const [category, setCategory] = useState('General');
   const [basePrice, setBasePrice] = useState<number | string>('2.0');
   const [rating, setRating] = useState<number | string>('');
+  const [keyPoints, setKeyPoints] = useState<number | string>('');
   const [status, setStatus] = useState<'Available' | 'Sold' | 'Unsold'>('Available');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +42,7 @@ export const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
       setCategory(player.playerCategory || 'General');
       setBasePrice(player.basePrice);
       setRating(player.rating !== null && player.rating !== undefined ? player.rating : '');
+      setKeyPoints(player.key_points !== null && player.key_points !== undefined ? player.key_points : '');
       setStatus(player.status);
       setError(null);
     }
@@ -68,6 +74,15 @@ export const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
       }
     }
 
+    let keyPointsNum: number | undefined = undefined;
+    if (isAdmin && keyPoints !== '' && keyPoints !== null && keyPoints !== undefined) {
+      keyPointsNum = Number(keyPoints);
+      if (isNaN(keyPointsNum) || keyPointsNum < 0) {
+        setError('Key points must be a non-negative number');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setError(null);
 
@@ -79,6 +94,7 @@ export const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
         player_category: category.trim(),
         base_price: priceNum,
         rating: ratingNum,
+        key_points: keyPointsNum,
         status,
       });
 
@@ -187,6 +203,21 @@ export const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
               className="player-edit-modal__input"
             />
           </div>
+
+          {isAdmin && (
+            <div className="player-edit-modal__field">
+              <label className="player-edit-modal__label">Secret Key Points 🔑 (Admin Only)</label>
+              <input
+                type="number"
+                min="0"
+                value={keyPoints}
+                onChange={(e) => setKeyPoints(e.target.value)}
+                placeholder="e.g. 95"
+                className="player-edit-modal__input"
+                style={{ borderColor: '#D97706' }}
+              />
+            </div>
+          )}
 
           <div className="player-edit-modal__field">
             <label className="player-edit-modal__label">Status</label>

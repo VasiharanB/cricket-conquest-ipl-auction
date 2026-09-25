@@ -100,16 +100,20 @@ export const LiveAuction: React.FC = () => {
     },
   });
 
-  // Client-side countdown timer: decrements every second when bidding is active
+  // Client-side countdown timer:
+  // Timer is ON ONLY when 'Going Once' or 'Going Twice' is selected.
+  // When another bid is placed, stage reverts to 'BIDDING' and timer resets to 15s, waiting for Going Once.
   useEffect(() => {
     const stage = sessionState?.stageState || 'INITIAL';
-    const isBiddingActive =
-      stage === 'BIDDING' ||
-      stage === 'GOING_ONCE' ||
-      stage === 'GOING_TWICE';
+    const isGoingCallActive = stage === 'GOING_ONCE' || stage === 'GOING_TWICE';
 
-    if (!isBiddingActive) return;
+    if (!isGoingCallActive) {
+      // In BIDDING, INITIAL, or any other state: keep timer at reset position (15s) and DO NOT count down
+      setTimerSeconds(sessionState?.timerSeconds || 15);
+      return;
+    }
 
+    // When Going Once or Going Twice is selected, start the timer countdown
     const countdown = setInterval(() => {
       setTimerSeconds((prev) => {
         if (prev <= 0) {

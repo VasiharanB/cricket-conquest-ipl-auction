@@ -365,6 +365,7 @@ export class PlayerService {
       player_category?: string;
       base_price?: number;
       rating?: number | null;
+      key_points?: number | null;
       status?: 'AVAILABLE' | 'SOLD' | 'UNSOLD';
     }
   ): Promise<DbPlayer> {
@@ -439,6 +440,21 @@ export class PlayerService {
         }
         updates.push('rating = ?');
         values.push(ratingNum);
+      }
+    }
+
+    if (input.key_points !== undefined) {
+      if (input.key_points === null || String(input.key_points).trim() === '') {
+        updates.push('key_points = NULL');
+      } else {
+        const kpNum = Number(input.key_points);
+        if (isNaN(kpNum) || kpNum < 0) {
+          const err: any = new Error('Key points must be a non-negative number');
+          err.statusCode = 400;
+          throw err;
+        }
+        updates.push('key_points = ?');
+        values.push(kpNum);
       }
     }
 

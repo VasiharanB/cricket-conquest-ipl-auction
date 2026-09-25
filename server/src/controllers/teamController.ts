@@ -135,6 +135,19 @@ export class TeamController {
     }
   }
 
+  static async cleanupEmptyTeams(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const result = await TeamService.deleteEmptyTeams();
+      res.json({
+        success: true,
+        message: `Successfully removed ${result.deletedCount} empty teams (< 2 members)`,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async getTeamSquad(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const teamId = String(req.params.teamId || '');

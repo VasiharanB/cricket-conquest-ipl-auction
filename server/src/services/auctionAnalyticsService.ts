@@ -132,7 +132,10 @@ export class AuctionAnalyticsService {
     const publishedAt = sessionRows[0]?.results_published_at || null;
 
     const [teamRows] = await pool.query<RowDataPacket[]>(
-      'SELECT id, team_id, team_name, college_name, starting_purse, remaining_purse FROM teams ORDER BY id ASC'
+      `SELECT t.id, t.team_id, t.team_name, t.college_name, t.starting_purse, t.remaining_purse 
+       FROM teams t
+       WHERE (SELECT COUNT(*) FROM team_members m WHERE m.team_id = t.id) >= 1
+       ORDER BY t.id ASC`
     );
 
     const standings: TeamResultItem[] = [];
@@ -194,10 +197,21 @@ export class AuctionAnalyticsService {
       });
     }
 
-    // Sort: 1) Most Key Points first, 2) Lower purse spent (tie-break), 3) Higher avg rating
+    // Sort:
+    // 1) Participating teams with acquired players rank above teams with 0 players
+    // 2) Most Key Points (sum of secret key points)
+    // 3) Lower purse spent (tie-break if Key Points sum is equal)
+    // 4) Higher squad rating
     standings.sort((a, b) => {
-      if (b.totalKeyPoints !== a.totalKeyPoints) return b.totalKeyPoints - a.totalKeyPoints;
-      if (a.totalSpent !== b.totalSpent) return a.totalSpent - b.totalSpent; // lower spent = winner on tie
+      if (a.playerCount > 0 && b.playerCount === 0) return -1;
+      if (a.playerCount === 0 && b.playerCount > 0) return 1;
+
+      if (b.totalKeyPoints !== a.totalKeyPoints) {
+        return b.totalKeyPoints - a.totalKeyPoints;
+      }
+      if (a.totalSpent !== b.totalSpent) {
+        return a.totalSpent - b.totalSpent; // lower spent = winner on tie
+      }
       return b.squadRating - a.squadRating;
     });
 

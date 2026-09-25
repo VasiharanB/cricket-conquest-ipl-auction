@@ -43,6 +43,7 @@ export const TeamsManagement: React.FC = () => {
   // Admin squad viewer
   const [teamSquad, setTeamSquad] = useState<SquadPlayer[]>([]);
   const [isLoadingSquad, setIsLoadingSquad] = useState<boolean>(false);
+  const [isCleaningEmpty, setIsCleaningEmpty] = useState<boolean>(false);
 
   // Debounce search
   useEffect(() => {
@@ -143,6 +144,27 @@ export const TeamsManagement: React.FC = () => {
     }
   };
 
+  const handleCleanupEmptyTeams = async () => {
+    if (!isAdmin) return;
+    const confirmed = window.confirm(
+      'Are you sure you want to remove all teams that have fewer than 2 team members? Teams must have a minimum of 2 or 4 members to be eligible.'
+    );
+    if (!confirmed) return;
+
+    setIsCleaningEmpty(true);
+    try {
+      const res = await teamService.cleanupEmptyTeams();
+      setToastMessage(`Successfully deleted ${res.deletedCount} ineligible teams with fewer than 2 members.`);
+      setSelectedTeam(null);
+      setTeamSquad([]);
+      loadTeams();
+    } catch (err: any) {
+      alert(err.message || 'Failed to remove empty teams');
+    } finally {
+      setIsCleaningEmpty(false);
+    }
+  };
+
   // Load squad when Admin selects a team
   const handleSelectTeam = useCallback(async (team: TeamRecord | null) => {
     setSelectedTeam(team);
@@ -178,11 +200,23 @@ export const TeamsManagement: React.FC = () => {
 
   return (
     <div className="teams-mgmt">
-      <div className="teams-mgmt__header">
+      <div className="teams-mgmt__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1 className="dashboard__title">Teams Management</h1>
           <p className="dashboard__desc">Manage registered teams, participant rosters, and event check-in</p>
         </div>
+        {isAdmin && (
+          <Button
+            variant="outline"
+            size="sm"
+            icon={<Trash2 size={14} />}
+            style={{ color: 'var(--color-danger, #EF4444)', borderColor: 'rgba(239, 68, 68, 0.4)' }}
+            onClick={handleCleanupEmptyTeams}
+            disabled={isCleaningEmpty}
+          >
+            {isCleaningEmpty ? 'Cleaning...' : 'Remove Teams Without Members (< 2)'}
+          </Button>
+        )}
       </div>
 
       {isVolunteer && (
@@ -536,16 +570,18 @@ export const TeamsManagement: React.FC = () => {
                         {teamSquad.map((p, i) => (
                           <div key={p.playerId} style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                            padding: '6px 10px', background: 'rgba(255,255,255,0.03)',
-                            border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, fontSize: 12,
+                            padding: '8px 12px', background: '#F8FAFC',
+                            border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13,
                           }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                              <span style={{ fontWeight: 600, color: '#F8FAFC' }}>{i + 1}. {p.playerName}</span>
-                              <span style={{ color: '#94A3B8' }}>{p.role} · {p.nationality}</span>
+                              <span style={{ fontWeight: 700, color: '#0F172A', fontSize: 13 }}>{i + 1}. {p.playerName}</span>
+                              <span style={{ color: '#64748B', fontSize: 11 }}>{p.role} · {p.nationality}</span>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-                              <span style={{ color: '#00F59B', fontWeight: 700 }}>₹{p.purchasePrice.toFixed(2)} Cr</span>
-                              <span style={{ color: '#FFB800', fontSize: 11 }}>🔑 {p.keyPoints} pts</span>
+                              <span style={{ color: '#059669', fontWeight: 800, fontSize: 13 }}>₹{p.purchasePrice.toFixed(2)} Cr</span>
+                              {isAdmin && (
+                                <span style={{ color: '#D97706', fontSize: 11, fontWeight: 700 }}>🔑 {p.keyPoints} pts</span>
+                              )}
                             </div>
                           </div>
                         ))}

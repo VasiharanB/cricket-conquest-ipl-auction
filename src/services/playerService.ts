@@ -11,6 +11,7 @@ export interface ApiPlayerRow {
   player_category: string;
   base_price: number | string;
   rating: number | null;
+  key_points?: number | null;
   status: 'AVAILABLE' | 'SOLD' | 'UNSOLD';
   sold_to_team_id: number | null;
   sold_price: number | string | null;
@@ -27,6 +28,7 @@ export interface PlayerRecord {
   playerCategory: string;
   basePrice: number;
   rating: number | null;
+  key_points?: number | null;
   status: 'Available' | 'Sold' | 'Unsold';
   soldToTeamId?: number | null;
   soldFor?: number | null;
@@ -98,6 +100,7 @@ function mapApiPlayerToRecord(raw: ApiPlayerRow): PlayerRecord {
     playerCategory: raw.player_category,
     basePrice: Number(raw.base_price) || 0,
     rating: raw.rating !== null ? Number(raw.rating) : null,
+    key_points: raw.key_points !== undefined && raw.key_points !== null ? Number(raw.key_points) : undefined,
     status: normalizeStatus(raw.status),
     soldToTeamId: raw.sold_to_team_id,
     soldFor: raw.sold_price !== null ? Number(raw.sold_price) : null,
@@ -192,6 +195,7 @@ export const playerService = {
       player_category?: string;
       base_price?: number;
       rating?: number | null;
+      key_points?: number | null;
       status?: 'Available' | 'Sold' | 'Unsold';
     }
   ): Promise<PlayerRecord> {

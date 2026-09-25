@@ -464,6 +464,7 @@ export const PlayerDatabase: React.FC = () => {
                 <th>Nationality</th>
                 <th>Base Price</th>
                 <th>Rating</th>
+                {isAdmin && <th>Key Points 🔑</th>}
                 <th>Status</th>
                 <th>Sold For</th>
                 <th className="player-db__th-actions">{isVolunteer ? 'Details' : 'Actions'}</th>
@@ -472,7 +473,7 @@ export const PlayerDatabase: React.FC = () => {
             <tbody>
               {isLoading && players.length === 0 ? (
                 <tr>
-                  <td colSpan={isAdmin ? 11 : 10} className="player-db__loading-cell">
+                  <td colSpan={isAdmin ? 12 : 10} className="player-db__loading-cell">
                     <Loader2 className="animate-spin" size={24} />
                     <span>Loading players from MySQL...</span>
                   </td>
@@ -510,6 +511,11 @@ export const PlayerDatabase: React.FC = () => {
                     </td>
                     <td>₹{p.basePrice} Cr</td>
                     <td>{p.rating !== null && p.rating !== undefined ? p.rating : '—'}</td>
+                    {isAdmin && (
+                      <td style={{ color: '#D97706', fontWeight: 700 }}>
+                        {p.key_points !== undefined && p.key_points !== null ? `${p.key_points} pts` : '—'}
+                      </td>
+                    )}
                     <td>{statusBadge(p.status)}</td>
                     <td>{p.soldFor ? `₹${p.soldFor} Cr` : '—'}</td>
                     <td

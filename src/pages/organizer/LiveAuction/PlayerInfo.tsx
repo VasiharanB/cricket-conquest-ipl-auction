@@ -5,9 +5,10 @@ import { formatCroreNumber } from './auctionCurrency';
 
 interface PlayerInfoProps {
   player: AuctionPlayer | null;
+  hideRating?: boolean;
 }
 
-export const PlayerInfo: React.FC<PlayerInfoProps> = ({ player }) => {
+export const PlayerInfo: React.FC<PlayerInfoProps> = ({ player, hideRating = false }) => {
   if (!player) {
     return (
       <div className="player-info player-info--empty">
@@ -45,7 +46,7 @@ export const PlayerInfo: React.FC<PlayerInfoProps> = ({ player }) => {
           </span>
         )}
 
-        {player.rating && (
+        {!hideRating && player.rating && (
           <span className="player-info__rating-pill">
             <span>Rating: {player.rating}</span>
           </span>
