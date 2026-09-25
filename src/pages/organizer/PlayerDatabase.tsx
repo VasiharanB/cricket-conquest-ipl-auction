@@ -1,11 +1,31 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Filter, Upload, Users, UserCheck, TrendingUp, UserX, AlertCircle, RefreshCw, Loader2, CheckCircle2, X, Pencil, Trash2 } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  Upload,
+  Users,
+  UserCheck,
+  TrendingUp,
+  UserX,
+  AlertCircle,
+  AlertTriangle,
+  RefreshCw,
+  Loader2,
+  CheckCircle2,
+  X,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 import { Badge, Card, Button, StatCard, Modal, PlayerImportModal, PlayerDetailModal, PlayerEditModal } from '../../components';
+import { useAuth } from '../../contexts/AuthContext';
 import { playerService } from '../../services/playerService';
 import type { PlayerRecord, PlayerStats, ImportResult } from '../../services/playerService';
 import './PlayerDatabase.css';
 
 export const PlayerDatabase: React.FC = () => {
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole('Admin');
+
   const [players, setPlayers] = useState<PlayerRecord[]>([]);
   const [stats, setStats] = useState<PlayerStats>({ total: 0, available: 0, sold: 0, unsold: 0 });
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -18,12 +38,27 @@ export const PlayerDatabase: React.FC = () => {
   const [natFilter, setNatFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
+  // Selection State (Selective Deletion)
+  const [selectedPlayerIds, setSelectedPlayerIds] = useState<Set<string>>(new Set());
+
   // Modals & Notifications
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerRecord | null>(null);
   const [playerToEdit, setPlayerToEdit] = useState<PlayerRecord | null>(null);
+
+  // Single player delete modal
   const [playerToDelete, setPlayerToDelete] = useState<PlayerRecord | null>(null);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+
+  // Bulk selective delete modal
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<boolean>(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState<boolean>(false);
+
+  // Entire list delete modal
+  const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState<boolean>(false);
+  const [deleteAllConfirmInput, setDeleteAllConfirmInput] = useState<string>('');
+  const [isDeletingAll, setIsDeletingAll] = useState<boolean>(false);
+
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
   // Debounce search input
@@ -84,18 +119,82 @@ export const PlayerDatabase: React.FC = () => {
     loadPlayers();
   };
 
+  // 1. Single Player Delete
   const handleDeleteConfirm = async () => {
     if (!playerToDelete) return;
     setIsDeleting(true);
     try {
       await playerService.deletePlayer(playerToDelete.id);
       setSuccessToast(`Player "${playerToDelete.name}" (${playerToDelete.id}) deleted successfully.`);
+      setSelectedPlayerIds((prev) => {
+        const next = new Set(prev);
+        next.delete(playerToDelete.id);
+        return next;
+      });
       setPlayerToDelete(null);
       loadPlayers();
     } catch (err: any) {
       alert(err.message || 'Failed to delete player');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  // 2. Selection Toggle Handlers
+  const handleToggleSelectAll = () => {
+    const visibleIds = players.map((p) => p.id);
+    const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedPlayerIds.has(id));
+    if (allSelected) {
+      setSelectedPlayerIds(new Set());
+    } else {
+      setSelectedPlayerIds(new Set(visibleIds));
+    }
+  };
+
+  const handleToggleSelectOne = (id: string) => {
+    setSelectedPlayerIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  // 3. Bulk Selective Delete
+  const handleBulkDeleteConfirm = async () => {
+    if (selectedPlayerIds.size === 0) return;
+    setIsBulkDeleting(true);
+    try {
+      const result = await playerService.bulkDeletePlayers(Array.from(selectedPlayerIds));
+      setSuccessToast(`Successfully deleted ${result.deletedCount} selected players.`);
+      setSelectedPlayerIds(new Set());
+      setIsBulkDeleteModalOpen(false);
+      loadPlayers();
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete selected players');
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
+  // 4. Delete Entire Player List
+  const handleDeleteAllConfirm = async () => {
+    if (deleteAllConfirmInput.trim() !== 'DELETE ALL') return;
+    setIsDeletingAll(true);
+    try {
+      const result = await playerService.deleteAllPlayers();
+      setSuccessToast(`Entire player list cleared successfully (${result.deletedCount} players deleted).`);
+      setSelectedPlayerIds(new Set());
+      setIsDeleteAllModalOpen(false);
+      setDeleteAllConfirmInput('');
+      loadPlayers();
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete all players');
+    } finally {
+      setIsDeletingAll(false);
     }
   };
 
@@ -142,6 +241,21 @@ export const PlayerDatabase: React.FC = () => {
           </p>
         </div>
         <div className="player-db__actions">
+          {isAdmin && (
+            <Button
+              variant="outline"
+              className="player-db__btn-danger-outline"
+              icon={<Trash2 size={16} />}
+              disabled={stats.total === 0 || isLoading}
+              onClick={() => {
+                setDeleteAllConfirmInput('');
+                setIsDeleteAllModalOpen(true);
+              }}
+              title="Delete all players from the database"
+            >
+              DELETE ENTIRE LIST
+            </Button>
+          )}
           <Button
             variant="primary"
             icon={<Upload size={16} />}
@@ -218,6 +332,34 @@ export const PlayerDatabase: React.FC = () => {
         </div>
       )}
 
+      {/* Selective Actions Floating Bar */}
+      {isAdmin && selectedPlayerIds.size > 0 && (
+        <div className="player-db__selection-banner animate-fade-in">
+          <div className="player-db__selection-info">
+            <CheckCircle2 size={18} className="player-db__selection-check-icon" />
+            <span className="player-db__selection-count">
+              <strong>{selectedPlayerIds.size}</strong> {selectedPlayerIds.size === 1 ? 'player' : 'players'} selected
+            </span>
+            <button
+              className="player-db__btn-link"
+              onClick={() => setSelectedPlayerIds(new Set())}
+            >
+              Deselect All
+            </button>
+          </div>
+          <div className="player-db__selection-actions">
+            <Button
+              variant="danger"
+              size="sm"
+              icon={<Trash2 size={15} />}
+              onClick={() => setIsBulkDeleteModalOpen(true)}
+            >
+              Delete Selected ({selectedPlayerIds.size})
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Table Card */}
       <Card padding="none">
         <div className="dashboard__table-header">
@@ -269,6 +411,25 @@ export const PlayerDatabase: React.FC = () => {
           <table className="data-table">
             <thead>
               <tr>
+                {isAdmin && (
+                  <th className="player-db__th-check" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      className="player-db__checkbox"
+                      checked={players.length > 0 && players.every((p) => selectedPlayerIds.has(p.id))}
+                      ref={(el) => {
+                        if (el) {
+                          const someSelected = players.some((p) => selectedPlayerIds.has(p.id));
+                          const allSelected = players.length > 0 && players.every((p) => selectedPlayerIds.has(p.id));
+                          el.indeterminate = someSelected && !allSelected;
+                        }
+                      }}
+                      onChange={handleToggleSelectAll}
+                      title="Select or deselect all visible players"
+                      aria-label="Select or deselect all visible players"
+                    />
+                  </th>
+                )}
                 <th>Player ID</th>
                 <th>Player Name</th>
                 <th>Role</th>
@@ -284,7 +445,7 @@ export const PlayerDatabase: React.FC = () => {
             <tbody>
               {isLoading && players.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="player-db__loading-cell">
+                  <td colSpan={isAdmin ? 11 : 10} className="player-db__loading-cell">
                     <Loader2 className="animate-spin" size={24} />
                     <span>Loading players from MySQL...</span>
                   </td>
@@ -293,10 +454,24 @@ export const PlayerDatabase: React.FC = () => {
                 players.map((p) => (
                   <tr
                     key={p.id}
-                    className="player-db__row"
+                    className={`player-db__row ${selectedPlayerIds.has(p.id) ? 'player-db__row--selected' : ''}`}
                     onClick={() => setSelectedPlayer(p)}
                     title="Click to view player details"
                   >
+                    {isAdmin && (
+                      <td
+                        className="player-db__td-check"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <input
+                          type="checkbox"
+                          className="player-db__checkbox"
+                          checked={selectedPlayerIds.has(p.id)}
+                          onChange={() => handleToggleSelectOne(p.id)}
+                          aria-label={`Select ${p.name}`}
+                        />
+                      </td>
+                    )}
                     <td className="data-table__mono">{p.id}</td>
                     <td className="data-table__bold">{p.name}</td>
                     <td>{roleBadge(p.role)}</td>
@@ -322,20 +497,22 @@ export const PlayerDatabase: React.FC = () => {
                       >
                         <Pencil size={15} />
                       </button>
-                      <button
-                        className="player-db__action-btn player-db__action-btn--delete"
-                        title={`Delete ${p.name}`}
-                        onClick={() => setPlayerToDelete(p)}
-                        aria-label={`Delete ${p.name}`}
-                      >
-                        <Trash2 size={15} />
-                      </button>
+                      {isAdmin && (
+                        <button
+                          className="player-db__action-btn player-db__action-btn--delete"
+                          title={`Delete ${p.name}`}
+                          onClick={() => setPlayerToDelete(p)}
+                          aria-label={`Delete ${p.name}`}
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={10} className="data-table__empty">
+                  <td colSpan={isAdmin ? 11 : 10} className="data-table__empty">
                     {debouncedSearch || roleFilter !== 'all' || natFilter !== 'all' || statusFilter !== 'all'
                       ? 'No players found matching your search or filters.'
                       : 'No players in the database yet. Click "IMPORT PLAYERS" above to load an Excel master file.'}
@@ -369,7 +546,7 @@ export const PlayerDatabase: React.FC = () => {
         onSuccess={handleEditSuccess}
       />
 
-      {/* Delete Confirmation Modal */}
+      {/* 1. Single Player Delete Confirmation Modal */}
       {playerToDelete && (
         <Modal
           isOpen={Boolean(playerToDelete)}
@@ -404,6 +581,129 @@ export const PlayerDatabase: React.FC = () => {
           </div>
         </Modal>
       )}
+
+      {/* 2. Selective / Bulk Delete Confirmation Modal */}
+      {isBulkDeleteModalOpen && (
+        <Modal
+          isOpen={isBulkDeleteModalOpen}
+          onClose={() => !isBulkDeleting && setIsBulkDeleteModalOpen(false)}
+          title="Delete Selected Players"
+          size="md"
+        >
+          <div className="player-db__delete-modal">
+            <div className="player-db__delete-modal-warning">
+              <AlertTriangle size={24} className="player-db__warning-icon" />
+              <div>
+                <h4 className="player-db__warning-title">Confirm Selective Deletion</h4>
+                <p className="player-db__warning-text">
+                  You are about to permanently delete <strong>{selectedPlayerIds.size}</strong> selected {selectedPlayerIds.size === 1 ? 'player' : 'players'} from the database.
+                </p>
+              </div>
+            </div>
+
+            <div className="player-db__selected-preview">
+              <div className="player-db__selected-preview-label">Players to be removed:</div>
+              <div className="player-db__selected-chips">
+                {players
+                  .filter((p) => selectedPlayerIds.has(p.id))
+                  .slice(0, 10)
+                  .map((p) => (
+                    <span key={p.id} className="player-db__selected-chip">
+                      {p.name} <small>({p.id})</small>
+                    </span>
+                  ))}
+                {selectedPlayerIds.size > 10 && (
+                  <span className="player-db__selected-chip player-db__selected-chip--more">
+                    +{selectedPlayerIds.size - 10} more
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <p className="player-db__delete-warning">
+              This action cannot be undone. Auction queues, bids, and purchases linked to these players will be removed.
+            </p>
+
+            <div className="player-db__delete-actions">
+              <Button
+                variant="outline"
+                onClick={() => setIsBulkDeleteModalOpen(false)}
+                disabled={isBulkDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleBulkDeleteConfirm}
+                disabled={isBulkDeleting}
+                icon={isBulkDeleting ? <Loader2 className="animate-spin" size={15} /> : <Trash2 size={15} />}
+              >
+                {isBulkDeleting ? 'Deleting Selected...' : `Delete ${selectedPlayerIds.size} Players`}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* 3. Delete Entire List Confirmation Modal */}
+      {isDeleteAllModalOpen && (
+        <Modal
+          isOpen={isDeleteAllModalOpen}
+          onClose={() => !isDeletingAll && setIsDeleteAllModalOpen(false)}
+          title="Delete Entire Player Pool"
+          size="md"
+        >
+          <div className="player-db__delete-modal">
+            <div className="player-db__delete-modal-danger">
+              <AlertTriangle size={28} className="player-db__danger-icon" />
+              <div>
+                <h4 className="player-db__danger-title">CRITICAL: Clear All Players</h4>
+                <p className="player-db__danger-text">
+                  This will permanently delete <strong>ALL {stats.total} players</strong> from the database, reset the auction queue, and wipe all unsold/sold records.
+                </p>
+              </div>
+            </div>
+
+            <div className="player-db__confirm-input-group">
+              <label htmlFor="confirm-delete-all" className="player-db__confirm-label">
+                To confirm wiping the entire player pool, please type <strong>DELETE ALL</strong> below:
+              </label>
+              <input
+                id="confirm-delete-all"
+                type="text"
+                className="player-db__confirm-input"
+                placeholder="Type DELETE ALL"
+                value={deleteAllConfirmInput}
+                onChange={(e) => setDeleteAllConfirmInput(e.target.value)}
+                autoComplete="off"
+                disabled={isDeletingAll}
+              />
+            </div>
+
+            <div className="player-db__delete-actions">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsDeleteAllModalOpen(false);
+                  setDeleteAllConfirmInput('');
+                }}
+                disabled={isDeletingAll}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleDeleteAllConfirm}
+                disabled={deleteAllConfirmInput.trim() !== 'DELETE ALL' || isDeletingAll}
+                icon={isDeletingAll ? <Loader2 className="animate-spin" size={15} /> : <Trash2 size={15} />}
+              >
+                {isDeletingAll ? 'Deleting Entire List...' : 'Permanently Delete All Players'}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };
+

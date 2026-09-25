@@ -463,7 +463,7 @@ export class PlayerService {
   }
 
   /**
-   * Delete a player
+   * Delete a single player
    */
   static async deletePlayer(idOrPlayerId: string): Promise<boolean> {
     const existing = await this.getPlayerById(idOrPlayerId);
@@ -473,11 +473,108 @@ export class PlayerService {
       throw err;
     }
 
-    const [result] = await pool.query<ResultSetHeader>(
-      'DELETE FROM players WHERE id = ?',
-      [existing.id]
-    );
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
 
-    return result.affectedRows > 0;
+    try {
+      // Clear auction session if current player is being deleted
+      await connection.query(
+        `UPDATE auction_sessions SET current_player_id = NULL, state_stage = 'INITIAL', current_bid = 0.00 WHERE current_player_id = ?`,
+        [existing.id]
+      );
+
+      const [result] = await connection.query<ResultSetHeader>(
+        'DELETE FROM players WHERE id = ?',
+        [existing.id]
+      );
+
+      await connection.commit();
+      return result.affectedRows > 0;
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * Bulk delete multiple selected players by their player_ids or numeric ids
+   */
+  static async bulkDeletePlayers(playerIds: string[]): Promise<{ deletedCount: number }> {
+    if (!Array.isArray(playerIds) || playerIds.length === 0) {
+      const err: any = new Error('No player IDs provided for deletion');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    try {
+      const placeholders = playerIds.map(() => '?').join(',');
+      const [players] = await connection.query<RowDataPacket[]>(
+        `SELECT id, player_id FROM players WHERE player_id IN (${placeholders}) OR id IN (${placeholders})`,
+        [...playerIds, ...playerIds]
+      );
+
+      if (players.length === 0) {
+        await connection.rollback();
+        return { deletedCount: 0 };
+      }
+
+      const internalIds = players.map((p) => p.id);
+      const idPlaceholders = internalIds.map(() => '?').join(',');
+
+      // Reset any active auction session where current_player_id is in these IDs
+      await connection.query(
+        `UPDATE auction_sessions SET current_player_id = NULL, state_stage = 'INITIAL', current_bid = 0.00 WHERE current_player_id IN (${idPlaceholders})`,
+        internalIds
+      );
+
+      // Delete from players (foreign keys with ON DELETE CASCADE will handle queue, purchases, bids)
+      const [result] = await connection.query<ResultSetHeader>(
+        `DELETE FROM players WHERE id IN (${idPlaceholders})`,
+        internalIds
+      );
+
+      await connection.commit();
+      return { deletedCount: result.affectedRows };
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * Delete entire player pool (all players) and reset auction state
+   */
+  static async deleteAllPlayers(): Promise<{ deletedCount: number }> {
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    try {
+      // Reset any active session player references
+      await connection.query(
+        `UPDATE auction_sessions SET current_player_id = NULL, state_stage = 'INITIAL', current_bid = 0.00`
+      );
+
+      // Explicitly clear queue, bids, and purchases for clean state
+      await connection.query(`DELETE FROM auction_queue`);
+      await connection.query(`DELETE FROM bids`);
+      await connection.query(`DELETE FROM player_purchases`);
+
+      const [result] = await connection.query<ResultSetHeader>('DELETE FROM players');
+
+      await connection.commit();
+      return { deletedCount: result.affectedRows };
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 }

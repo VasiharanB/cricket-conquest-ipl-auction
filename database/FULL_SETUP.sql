@@ -127,6 +127,8 @@ CREATE TABLE IF NOT EXISTS auction_sessions (
   ) NOT NULL DEFAULT 'INITIAL',
   timer_seconds         INT NOT NULL DEFAULT 15,
   round_number          INT NOT NULL DEFAULT 1,
+  is_results_published  BOOLEAN NOT NULL DEFAULT FALSE,
+  results_published_at  TIMESTAMP NULL,
   started_at            TIMESTAMP NULL,
   ended_at              TIMESTAMP NULL,
   created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -37,7 +37,7 @@ async function runCloudMigration() {
   console.log('✅ Connected to Cloud MySQL successfully!');
 
   // 1. Read and execute FULL_SETUP.sql
-  const sqlPath = path.resolve(__dirname, '../../database/FULL_SETUP.sql');
+  const sqlPath = path.resolve(__dirname, '../database/FULL_SETUP.sql');
   if (!fs.existsSync(sqlPath)) {
     throw new Error(`FULL_SETUP.sql not found at ${sqlPath}`);
   }
@@ -52,8 +52,16 @@ async function runCloudMigration() {
       .replace(/USE cricket_conquest;/gi, '');
   }
 
-  await connection.query(sqlContent);
-  console.log('✅ All 11 tables & constraints created successfully in Cloud MySQL!');
+  try {
+    await connection.query(sqlContent);
+    console.log('✅ All 11 tables & constraints created successfully in Cloud MySQL!');
+  } catch (err: any) {
+    if (err.message?.includes('Duplicate foreign key') || err.message?.includes('already exists')) {
+      console.log('ℹ️ Tables & constraints already exist in Cloud MySQL. Continuing with seeding...');
+    } else {
+      throw err;
+    }
+  }
 
   // 2. Seed Default Organizers
   console.log('🔐 Seeding default organizer accounts (Admin, Auctioneer, Volunteer)...');
@@ -135,7 +143,7 @@ async function runCloudMigration() {
   // Set first player on stage
   await connection.query(
     `UPDATE auction_sessions 
-     SET current_player_id = ?, stage_state = 'PLAYER_READY', current_bid = 2.00, timer_seconds = 15, round_number = 1 
+     SET current_player_id = ?, state_stage = 'PLAYER_READY', current_bid = 2.00, timer_seconds = 15, round_number = 1 
      WHERE id = ?`,
     [dbPlayers[0].id, sessionId]
   );

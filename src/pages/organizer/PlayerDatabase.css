@@ -218,3 +218,247 @@
   padding-top: var(--space-3);
   border-top: 1px solid var(--color-border-light);
 }
+
+/* Danger Outline Header Action Button */
+.player-db__btn-danger-outline {
+  border-color: color-mix(in srgb, var(--color-danger) 40%, transparent) !important;
+  color: var(--color-danger) !important;
+  background: transparent !important;
+}
+
+.player-db__btn-danger-outline:hover:not(:disabled) {
+  background: var(--color-danger-soft) !important;
+  border-color: var(--color-danger) !important;
+  color: var(--color-danger) !important;
+}
+
+/* Checkbox Column Styling */
+.player-db__th-check,
+.player-db__td-check {
+  width: 44px;
+  min-width: 44px;
+  max-width: 44px;
+  text-align: center !important;
+  padding-left: var(--space-3) !important;
+  padding-right: var(--space-3) !important;
+}
+
+.player-db__checkbox {
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+  accent-color: var(--color-royal-blue);
+  vertical-align: middle;
+  border-radius: var(--radius-sm);
+}
+
+.player-db__row--selected {
+  background: color-mix(in srgb, var(--color-royal-blue) 9%, var(--color-surface)) !important;
+}
+
+.player-db__row--selected:hover {
+  background: color-mix(in srgb, var(--color-royal-blue) 14%, var(--color-surface)) !important;
+}
+
+/* Selection Action Banner */
+.player-db__selection-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-5);
+  background: color-mix(in srgb, var(--color-royal-blue) 12%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-royal-blue) 30%, transparent);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.player-db__selection-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.player-db__selection-check-icon {
+  color: var(--color-royal-blue);
+  flex-shrink: 0;
+}
+
+.player-db__selection-count {
+  font-size: var(--font-size-sm);
+}
+
+.player-db__selection-count strong {
+  color: var(--color-royal-blue);
+}
+
+.player-db__btn-link {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+}
+
+.player-db__btn-link:hover {
+  color: var(--color-text-primary);
+}
+
+.player-db__selection-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Modals Callouts & Inputs */
+.player-db__delete-modal-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-warning-soft);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 30%, transparent);
+  border-radius: var(--radius-md);
+}
+
+.player-db__warning-icon {
+  color: var(--color-warning);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.player-db__warning-title {
+  margin: 0 0 4px 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-warning);
+}
+
+.player-db__warning-text {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.player-db__delete-modal-danger {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-danger-soft);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
+  border-radius: var(--radius-md);
+}
+
+.player-db__danger-icon {
+  color: var(--color-danger);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.player-db__danger-title {
+  margin: 0 0 4px 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-danger);
+}
+
+.player-db__danger-text {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.player-db__selected-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.player-db__selected-preview-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.player-db__selected-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  max-height: 110px;
+  overflow-y: auto;
+  padding: var(--space-2);
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
+}
+
+.player-db__selected-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  padding: 2px 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+}
+
+.player-db__selected-chip small {
+  color: var(--color-text-secondary);
+}
+
+.player-db__selected-chip--more {
+  background: transparent;
+  border-style: dashed;
+  color: var(--color-royal-blue);
+  font-weight: var(--font-weight-semibold);
+}
+
+.player-db__confirm-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.player-db__confirm-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.player-db__confirm-label strong {
+  color: var(--color-danger);
+  font-family: monospace;
+}
+
+.player-db__confirm-input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-family: monospace;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  border: 1.5px solid color-mix(in srgb, var(--color-danger) 50%, transparent);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-danger);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.player-db__confirm-input:focus {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 20%, transparent);
+}

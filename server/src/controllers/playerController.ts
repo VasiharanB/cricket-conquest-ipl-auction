@@ -103,4 +103,39 @@ export class PlayerController {
       next(error);
     }
   }
+
+  static async bulkDeletePlayers(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { playerIds } = req.body;
+      if (!Array.isArray(playerIds) || playerIds.length === 0) {
+        res.status(400).json({
+          success: false,
+          message: 'Expected "playerIds" to be a non-empty array of player IDs',
+        });
+        return;
+      }
+
+      const result = await PlayerService.bulkDeletePlayers(playerIds);
+      res.json({
+        success: true,
+        message: `Successfully deleted ${result.deletedCount} player(s)`,
+        deletedCount: result.deletedCount,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async deleteAllPlayers(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const result = await PlayerService.deleteAllPlayers();
+      res.json({
+        success: true,
+        message: `All players (${result.deletedCount}) have been deleted successfully`,
+        deletedCount: result.deletedCount,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

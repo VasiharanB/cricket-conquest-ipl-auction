@@ -14,6 +14,8 @@ router.get('/:playerId', authenticateToken, requireRole('Admin', 'Auctioneer', '
 // WRITE routes: Admin & Auctioneer can manage player data; Admin deletes
 // ─────────────────────────────────────────────────────────────────────
 router.post('/import', authenticateToken, requireRole('Admin', 'Auctioneer'), PlayerController.importPlayers);
+router.post('/bulk-delete', authenticateToken, requireRole('Admin'), PlayerController.bulkDeletePlayers);
+router.delete('/all', authenticateToken, requireRole('Admin'), PlayerController.deleteAllPlayers);
 router.put('/:playerId', authenticateToken, requireRole('Admin', 'Auctioneer'), PlayerController.updatePlayer);
 router.delete('/:playerId', authenticateToken, requireRole('Admin'), PlayerController.deletePlayer);
 

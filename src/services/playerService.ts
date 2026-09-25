@@ -232,4 +232,42 @@ export const playerService = {
       throw new Error(errBody.message || `Failed to delete player (status ${res.status})`);
     }
   },
+
+  /**
+   * Bulk delete multiple selected players by array of IDs
+   */
+  async bulkDeletePlayers(playerIds: string[]): Promise<{ success: boolean; deletedCount: number }> {
+    const res = await fetch(`${API_BASE}/bulk-delete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({ playerIds }),
+    });
+
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.message || `Failed to delete selected players (status ${res.status})`);
+    }
+
+    return await res.json();
+  },
+
+  /**
+   * Delete all players from the database
+   */
+  async deleteAllPlayers(): Promise<{ success: boolean; deletedCount: number }> {
+    const res = await fetch(`${API_BASE}/all`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.message || `Failed to delete all players (status ${res.status})`);
+    }
+
+    return await res.json();
+  },
 };
