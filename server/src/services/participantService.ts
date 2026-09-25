@@ -107,7 +107,7 @@ export class ParticipantService {
       pool.query<RowDataPacket[]>('SELECT * FROM teams WHERE id = ? LIMIT 1', [teamDbId]),
       pool.query<RowDataPacket[]>('SELECT id, member_number, full_name, email, phone, is_captain FROM team_members WHERE team_id = ? ORDER BY member_number ASC', [teamDbId]),
       pool.query<RowDataPacket[]>(
-        `SELECT p.id, p.player_id, p.player_name, p.role, p.player_category, p.rating, pp.purchase_price
+        `SELECT p.id, p.player_id, p.player_name, p.role, p.nationality, p.player_category, p.rating, pp.purchase_price
          FROM player_purchases pp
          JOIN players p ON pp.player_id = p.id
          WHERE pp.team_id = ? AND pp.is_undone = FALSE`,

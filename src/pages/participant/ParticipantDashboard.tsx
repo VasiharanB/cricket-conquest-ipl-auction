@@ -278,17 +278,17 @@ export const ParticipantDashboard: React.FC = () => {
               ₹{profile.remainingPurse.toFixed(2)} Cr
             </span>
             <span style={{ fontSize: 12, color: '#64748B' }}>
-              Starting: ₹{profile.startingPurse.toFixed(2)} Cr
+              Purse Cap: ₹{profile.startingPurse.toFixed(2)} Cr
             </span>
           </div>
 
           <div className="part-stat-card">
             <span className="part-stat-label">Players Acquired</span>
             <span className="part-stat-value">
-              {profile.squad.length} <span style={{ fontSize: 16, color: '#64748B' }}>/ 15</span>
+              {profile.squad.length} <span style={{ fontSize: 16, color: '#64748B' }}>/ 11</span>
             </span>
-            <span style={{ fontSize: 12, color: '#64748B' }}>
-              Min Required: 5 Players
+            <span style={{ fontSize: 12, color: profile.squad.length === 11 ? '#00F59B' : '#F59E0B' }}>
+              {profile.squad.length === 11 ? '✓ Squad Limit Reached' : `Target: Exactly 11 Players`}
             </span>
           </div>
 
@@ -298,7 +298,7 @@ export const ParticipantDashboard: React.FC = () => {
               ₹{(profile.startingPurse - profile.remainingPurse).toFixed(2)} Cr
             </span>
             <span style={{ fontSize: 12, color: '#64748B' }}>
-              Verified by MySQL Engine
+              Budget Limit: ₹80.00 Cr
             </span>
           </div>
 
@@ -312,6 +312,99 @@ export const ParticipantDashboard: React.FC = () => {
             </span>
           </div>
         </div>
+
+        {/* Live Rule Book Squad Tracker */}
+        {(() => {
+          const squad = profile.squad || [];
+          const pureBat = squad.filter(p => p.role.toLowerCase().includes('bat')).length;
+          const wk = squad.filter(p => p.role.toLowerCase().includes('keeper') || p.role.toLowerCase().includes('wk')).length;
+          const bat = pureBat + wk;
+          const bowl = squad.filter(p => p.role.toLowerCase().includes('bowl')).length;
+          const all = squad.filter(p => p.role.toLowerCase().includes('all') || p.role.toLowerCase().includes('round')).length;
+          const foreign = squad.filter(p => (p.nationality || '').trim().toLowerCase() !== 'indian').length;
+          const totalSpent = profile.startingPurse - profile.remainingPurse;
+
+          const isComplete = squad.length === 11;
+          const isValid = isComplete && bat === 5 && bowl === 3 && all === 3 && foreign === 4 && totalSpent <= 80;
+
+          return (
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.7))',
+              border: `1px solid ${isValid ? 'rgba(0, 245, 155, 0.35)' : 'rgba(56, 189, 248, 0.2)'}`,
+              borderRadius: 16,
+              padding: '18px 22px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 18 }}>📋</span>
+                  <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#38BDF8' }}>
+                    Rule Book Squad Combination Tracker
+                  </h3>
+                </div>
+                {isValid ? (
+                  <span style={{ background: 'rgba(0, 245, 155, 0.15)', color: '#00F59B', border: '1px solid #00F59B', padding: '3px 12px', borderRadius: 999, fontSize: 12, fontWeight: 800 }}>
+                    ✓ SQUAD QUALIFIED FOR CHAMPIONSHIP
+                  </span>
+                ) : isComplete ? (
+                  <span style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#F87171', border: '1px solid #EF4444', padding: '3px 12px', borderRadius: 999, fontSize: 12, fontWeight: 800 }}>
+                    ❌ ELIMINATION RISK: Role Quota Mismatch
+                  </span>
+                ) : (
+                  <span style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', border: '1px solid #F59E0B', padding: '3px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700 }}>
+                    ⚡ IN PROGRESS: Need {11 - squad.length} More Players
+                  </span>
+                )}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8 }}>
+                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Squad Size (11)</span>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: squad.length === 11 ? '#00F59B' : '#F8FAFC', marginTop: 2 }}>
+                    {squad.length} / 11 {squad.length === 11 ? '✓' : ''}
+                  </div>
+                </div>
+
+                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Batsmen/WK (5)</span>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: bat === 5 ? '#00F59B' : '#38BDF8', marginTop: 2 }}>
+                    {bat} / 5 {bat === 5 ? '✓' : ''}
+                  </div>
+                </div>
+
+                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Bowlers (3)</span>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: bowl === 3 ? '#00F59B' : '#38BDF8', marginTop: 2 }}>
+                    {bowl} / 3 {bowl === 3 ? '✓' : ''}
+                  </div>
+                </div>
+
+                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>All-Rounders (3)</span>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: all === 3 ? '#00F59B' : '#A855F7', marginTop: 2 }}>
+                    {all} / 3 {all === 3 ? '✓' : ''}
+                  </div>
+                </div>
+
+                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Foreign (4)</span>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: foreign === 4 ? '#00F59B' : foreign > 4 ? '#F87171' : '#F59E0B', marginTop: 2 }}>
+                    {foreign} / 4 {foreign === 4 ? '✓' : ''}
+                  </div>
+                </div>
+
+                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Purse (₹80 Cr)</span>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: totalSpent <= 80 ? '#00F59B' : '#F87171', marginTop: 2 }}>
+                    ₹{totalSpent.toFixed(1)} Cr {totalSpent <= 80 ? '✓' : '⚠️'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Squad Bought in Auction & Lineup Positioning */}
         <div style={{ background: 'rgba(13, 23, 42, 0.7)', borderRadius: 20, border: '1px solid rgba(255, 255, 255, 0.08)', overflow: 'hidden' }}>

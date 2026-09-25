@@ -5,16 +5,14 @@ import { Button } from '../../components';
 import './LandingPage.css';
 
 const rules = [
-  'Each team must consist of 2–4 participants.',
-  'Teams participate in an IPL-style simulated player auction.',
-  'Each team receives a fixed virtual purse.',
-  'Players are purchased through bidding.',
-  'Base prices are announced before bidding.',
-  'Teams must manage their purse carefully.',
-  'Teams must satisfy the minimum and maximum squad requirements specified by organizers.',
-  'Once a bid is accepted and a player is assigned to a team, the decision is final.',
-  'The auction continues until all required players are selected or the specified rounds are completed.',
-  'Misconduct, cheating, malpractice or unfair means can result in disqualification.',
+  'Each team consists of 2–4 registered student participants.',
+  'Total auction purse per team is strictly ₹80.00 Crore (exceeding purse results in immediate disqualification).',
+  'Each team must acquire exactly 11 players in their final squad.',
+  'Required Squad Combination: 5 Batsmen / Wicketkeepers, 3 Bowlers, and 3 All-rounders (5 + 3 + 3 = 11).',
+  'Overseas Quota: Maximum 4 Foreign players per team (4 Overseas + 7 Indian = 11 players).',
+  'Capped and uncapped players have no limit — choose any tier to optimize your strategy.',
+  'Elimination Policy: Any team failing to satisfy this exact 11-player combination is eliminated from championship contention.',
+  'Championship Decision: The team with the highest Secret Key Points among qualified squads wins the tournament. Tiebreak is decided by lowest purse spent.',
 ];
 
 const steps = [

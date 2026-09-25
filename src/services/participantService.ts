@@ -37,6 +37,7 @@ export interface ParticipantProfile {
     player_id: string;
     player_name: string;
     role: string;
+    nationality?: string;
     player_category: string;
     rating: number;
     purchase_price: number;

@@ -83,10 +83,23 @@ export interface TeamResultSquadPlayer {
   id: string;
   name: string;
   role: string;
+  nationality?: string;
   category: string;
   price: number;
   rating: number;
   keyPoints?: number;
+}
+
+export interface SquadRuleEvaluation {
+  isValid: boolean;
+  isEliminated: boolean;
+  totalPlayers: { current: number; required: number; passed: boolean };
+  batsmen: { current: number; required: number; passed: boolean };
+  bowlers: { current: number; required: number; passed: boolean };
+  allRounders: { current: number; required: number; passed: boolean };
+  foreignPlayers: { current: number; required: number; passed: boolean };
+  purse: { spent: number; limit: number; remaining: number; passed: boolean };
+  violations: string[];
 }
 
 export interface TeamResultItem {
@@ -102,16 +115,29 @@ export interface TeamResultItem {
   totalScore?: number;
   roleCounts: {
     batsman: number;
+    pureBatsman?: number;
     bowler: number;
     allRounder: number;
     wicketkeeper: number;
+    foreign?: number;
+    indian?: number;
   };
+  ruleEvaluation?: SquadRuleEvaluation;
   players: TeamResultSquadPlayer[];
 }
 
 export interface AuctionResultsPayload {
   isPublished: boolean;
   publishedAt: string | null;
+  rules?: {
+    REQUIRED_PLAYERS: number;
+    REQUIRED_BATSMEN: number;
+    REQUIRED_BOWLERS: number;
+    REQUIRED_ALLROUNDERS: number;
+    REQUIRED_FOREIGN: number;
+    MAX_FOREIGN: number;
+    STARTING_PURSE: number;
+  };
   standings: TeamResultItem[];
 }
 
