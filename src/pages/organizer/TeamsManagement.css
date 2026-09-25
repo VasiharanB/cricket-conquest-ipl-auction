@@ -1,0 +1,275 @@
+/* Teams Management */
+.teams-mgmt__header { margin-bottom: var(--space-6); }
+
+.teams-mgmt__layout {
+  display: flex;
+  gap: var(--space-6);
+  align-items: flex-start;
+}
+
+.teams-mgmt__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.data-table__row--selected {
+  background: var(--color-royal-blue-soft) !important;
+}
+
+/* Detail Panel */
+.team-detail {
+  width: 360px;
+  flex-shrink: 0;
+  position: sticky;
+  top: var(--space-8);
+}
+
+.team-detail__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.team-detail__name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-navy);
+}
+
+.team-detail__close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text-tertiary);
+  transition: all var(--transition-fast);
+}
+
+.team-detail__close:hover {
+  background: var(--color-bg-alt);
+  color: var(--color-text-primary);
+}
+
+.team-detail__body {
+  padding: var(--space-5) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.team-detail__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.team-detail__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.team-detail__value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.team-detail__value--highlight {
+  color: var(--color-success);
+}
+
+.team-detail__section {
+  margin-top: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.team-detail__section-title {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+  margin-bottom: var(--space-3);
+}
+
+.team-detail__comp-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-1) 0;
+}
+
+.team-detail__comp-count {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.team-detail__players {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.team-detail__player-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.team-detail__player-price {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-royal-blue);
+  font-size: var(--font-size-xs);
+}
+
+.team-detail__members-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.team-detail__member-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
+}
+
+.team-detail__member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.team-detail__member-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.team-detail__member-contact {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+.teams-mgmt__toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  border: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-5);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.teams-mgmt__toast-close {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--color-success);
+  cursor: pointer;
+  padding: 2px;
+}
+
+.teams-mgmt__error-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-danger-soft);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 25%, transparent);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-5);
+}
+
+.teams-mgmt__error-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.teams-mgmt__error-title {
+  margin: 0;
+  font-size: var(--font-size-base);
+  color: var(--color-danger);
+  font-weight: var(--font-weight-semibold);
+}
+
+.teams-mgmt__error-desc {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.teams-mgmt__status-select {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  outline: none;
+}
+
+.teams-mgmt__college-cell {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teams-mgmt__actions-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.teams-mgmt__action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.teams-mgmt__action-btn:hover {
+  background: var(--color-royal-blue-soft);
+  color: var(--color-royal-blue);
+  border-color: var(--color-royal-blue);
+}
+
+.teams-mgmt__action-btn--delete:hover {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+@media (max-width: 1024px) {
+  .teams-mgmt__layout { flex-direction: column; }
+  .team-detail { width: 100%; position: static; }
+}

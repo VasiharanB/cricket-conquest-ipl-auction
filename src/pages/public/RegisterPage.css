@@ -1,0 +1,185 @@
+/* ============================================
+   Registration Page Styles
+   ============================================ */
+
+.register-page {
+  padding: var(--space-10) 0 var(--space-16);
+  min-height: calc(100vh - var(--header-height));
+  background: var(--color-bg);
+}
+
+.register-page__header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.register-page__title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-navy);
+  margin-bottom: var(--space-2);
+}
+
+.register-page__desc {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+}
+
+/* Step Indicator */
+.step-indicator {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-8);
+}
+
+.step-indicator__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  max-width: 120px;
+  position: relative;
+}
+
+.step-indicator__circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-alt);
+  color: var(--color-text-tertiary);
+  border: 2px solid var(--color-border);
+  transition: all var(--transition-normal);
+}
+
+.step-indicator__item--active .step-indicator__circle {
+  background: var(--color-royal-blue);
+  color: var(--color-white);
+  border-color: var(--color-royal-blue);
+}
+
+.step-indicator__item--done .step-indicator__circle {
+  background: var(--color-success);
+  color: var(--color-white);
+  border-color: var(--color-success);
+}
+
+.step-indicator__label {
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+  text-align: center;
+}
+
+.step-indicator__item--active .step-indicator__label {
+  color: var(--color-royal-blue);
+  font-weight: var(--font-weight-semibold);
+}
+
+.step-indicator__item--done .step-indicator__label {
+  color: var(--color-success);
+}
+
+/* Form */
+.register-form {
+  padding: var(--space-8);
+}
+
+.form-step__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-navy);
+  margin-bottom: var(--space-2);
+}
+
+.form-step__desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-6);
+}
+
+.form-step__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Review */
+.review-card {
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.review-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.review-row__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-medium);
+}
+
+.review-row__value {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.review-members {
+  padding-top: var(--space-2);
+}
+
+.review-members__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-medium);
+  display: block;
+  margin-bottom: var(--space-3);
+}
+
+.review-members__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.review-members__list li {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+}
+
+/* Form Nav */
+.form-nav {
+  display: flex;
+  align-items: center;
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.form-nav__spacer {
+  flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .register-form { padding: var(--space-5); }
+  .step-indicator__label { display: none; }
+  .review-row { flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+}

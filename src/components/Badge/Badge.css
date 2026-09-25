@@ -1,0 +1,83 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.badge--sm {
+  padding: 3px 10px;
+  font-size: 11px;
+}
+
+.badge--md {
+  padding: 5px 14px;
+  font-size: var(--font-size-xs);
+}
+
+.badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Variants */
+.badge--confirmed {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.badge--confirmed .badge__dot { background: var(--color-success); }
+
+.badge--pending {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+.badge--pending .badge__dot { background: var(--color-warning); }
+
+.badge--checked-in {
+  background: var(--color-info-soft);
+  color: var(--color-royal-blue);
+}
+.badge--checked-in .badge__dot { background: var(--color-royal-blue); }
+
+.badge--waitlisted {
+  background: var(--color-purple-soft);
+  color: var(--color-purple);
+}
+.badge--waitlisted .badge__dot { background: var(--color-purple); }
+
+.badge--sold {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.badge--sold .badge__dot { background: var(--color-success); }
+
+.badge--unsold {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+.badge--unsold .badge__dot { background: var(--color-danger); }
+
+.badge--available {
+  background: var(--color-royal-blue-soft);
+  color: var(--color-royal-blue);
+}
+.badge--available .badge__dot { background: var(--color-royal-blue); }
+
+.badge--live {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  animation: livePulse 2s infinite;
+}
+.badge--live .badge__dot { background: var(--color-danger); }
+
+.badge--info {
+  background: var(--color-bg-alt);
+  color: var(--color-text-secondary);
+}
+.badge--info .badge__dot { background: var(--color-text-tertiary); }
