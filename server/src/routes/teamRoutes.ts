@@ -17,9 +17,10 @@ router.get('/:teamId/members', authenticateToken, requireRole('Admin', 'Auctione
 router.patch('/:teamId/check-in', authenticateToken, requireRole('Admin', 'Auctioneer'), TeamController.updateCheckInStatus);
 
 // ─────────────────────────────────────────────────────────────────────
-// WRITE routes: Admin only for destructive operations
+// WRITE routes: Team registration is public; status & updates are Admin only
 // ─────────────────────────────────────────────────────────────────────
-router.post('/', authenticateToken, requireRole('Admin'), TeamController.createTeam);
+router.post('/', TeamController.createTeam);
+router.post('/register', TeamController.createTeam);
 router.patch('/:teamId/status', authenticateToken, requireRole('Admin'), TeamController.updateRegistrationStatus);
 router.put('/:teamId', authenticateToken, requireRole('Admin'), TeamController.updateTeam);
 router.delete('/:teamId', authenticateToken, requireRole('Admin'), TeamController.deleteTeam);
