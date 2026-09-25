@@ -19,8 +19,12 @@ async function startServer() {
     const server = http.createServer(app);
     auctionWsManager.init(server);
 
-    server.listen(PORT, () => {
-      console.log(`[SERVER] Cricket Conquest API & WebSocket running on http://localhost:${PORT}`);
+    server.on('error', (err) => {
+      console.error('[SERVER ERROR]', err);
+    });
+
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log(`[SERVER] Cricket Conquest API & WebSocket running on http://0.0.0.0:${PORT}`);
     });
 
     const shutdown = async (signal: string) => {
