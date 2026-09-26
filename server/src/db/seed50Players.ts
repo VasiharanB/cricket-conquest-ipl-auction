@@ -55,12 +55,16 @@ export const players50List = [
 ];
 
 export const starterTeams = [
-  { teamId: 'CC26-001', name: 'Mumbai Indians', college: 'PSVPEC', captain: 'Mohammed Shameem', email: 'shameem@psvpec.edu', phone: '9876543210', code: 'CC26-MUMB-5692' },
-  { teamId: 'CC26-002', name: 'Mumbai Warriors', college: 'CIT', captain: 'Rahul Menon', email: 'rahul@cit.edu', phone: '9876543211', code: 'CC26-MUMB-5995' },
-  { teamId: 'CC26-003', name: 'Chennai Kings', college: 'SKCET', captain: 'Karthik Raja', email: 'karthik@skcet.edu', phone: '9876543212', code: 'CC26-CHEN-2897' },
-  { teamId: 'CC26-004', name: 'Delhi Titans', college: 'KCT', captain: 'Siddharth Iyer', email: 'siddharth@kct.edu', phone: '9876543213', code: 'CC26-DELH-4502' },
-  { teamId: 'CC26-005', name: 'Royal Challengers', college: 'Anna Univ', captain: 'Vikram Seth', email: 'vikram@annauniv.edu', phone: '9876543214', code: 'CC26-ROYA-3310' },
-  { teamId: 'CC26-006', name: 'Kolkata Riders', college: 'IIT Madras', captain: 'Aravind Swamy', email: 'aravind@iitm.edu', phone: '9876543215', code: 'CC26-KOLK-7721' },
+  { teamId: 'CC26-001', name: 'Chennai Super Kings', college: 'IPL Franchise - Chennai', captain: 'N. Srinivasan', email: 'srinivasan@csk.com', phone: '9876543001', code: 'CC26-CSK-2026' },
+  { teamId: 'CC26-002', name: 'Mumbai Indians', college: 'IPL Franchise - Mumbai', captain: 'Mukesh Ambani', email: 'ambani@mi.com', phone: '9876543002', code: 'CC26-MI-2026' },
+  { teamId: 'CC26-003', name: 'Royal Challengers Bengaluru', college: 'IPL Franchise - Bengaluru', captain: 'Aryaman Birla', email: 'birla@rcb.com', phone: '9876543003', code: 'CC26-RCB-2026' },
+  { teamId: 'CC26-004', name: 'Kolkata Knight Riders', college: 'IPL Franchise - Kolkata', captain: 'Shah Rukh Khan', email: 'srk@kkr.com', phone: '9876543004', code: 'CC26-KKR-2026' },
+  { teamId: 'CC26-005', name: 'Sunrisers Hyderabad', college: 'IPL Franchise - Hyderabad', captain: 'Kalanithi Maran', email: 'maran@srh.com', phone: '9876543005', code: 'CC26-SRH-2026' },
+  { teamId: 'CC26-006', name: 'Rajasthan Royals', college: 'IPL Franchise - Rajasthan', captain: 'Lakshmi Mittal', email: 'mittal@rr.com', phone: '9876543006', code: 'CC26-RR-2026' },
+  { teamId: 'CC26-007', name: 'Delhi Capitals', college: 'IPL Franchise - Delhi', captain: 'Parth Jindal', email: 'jindal@dc.com', phone: '9876543007', code: 'CC26-DC-2026' },
+  { teamId: 'CC26-008', name: 'Punjab Kings', college: 'IPL Franchise - Punjab', captain: 'Preity Zinta', email: 'preity@pbks.com', phone: '9876543008', code: 'CC26-PBKS-2026' },
+  { teamId: 'CC26-009', name: 'Gujarat Titans', college: 'IPL Franchise - Gujarat', captain: 'Torrent Group', email: 'torrent@gt.com', phone: '9876543009', code: 'CC26-GT-2026' },
+  { teamId: 'CC26-010', name: 'Lucknow Super Giants', college: 'IPL Franchise - Lucknow', captain: 'Sanjiv Goenka', email: 'goenka@lsg.com', phone: '9876543010', code: 'CC26-LSG-2026' },
 ];
 
 export async function seed50PlayersAndResetAuction(): Promise<{ playersCount: number; teamsCount: number; sessionId: number }> {
@@ -90,26 +94,26 @@ export async function seed50PlayersAndResetAuction(): Promise<{ playersCount: nu
     }
     console.log(`[SEED-50] Inserted ${players50List.length} players into MySQL.`);
 
-    // 3. Upsert starter teams with exact access codes and ₹100 Cr starting purse
+    // 3. Upsert starter teams with exact access codes and ₹50 Cr starting purse
     for (const t of starterTeams) {
       const [existing] = await connection.query<RowDataPacket[]>('SELECT id FROM teams WHERE team_id = ?', [t.teamId]);
       if (existing.length === 0) {
         await connection.query(
           `INSERT INTO teams 
            (team_id, team_name, college_name, captain_name, captain_email, captain_phone, access_code, registration_status, check_in_status, starting_purse, remaining_purse, players_bought) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, 'CONFIRMED', 'CHECKED_IN', 100.00, 100.00, 0)`,
+           VALUES (?, ?, ?, ?, ?, ?, ?, 'CONFIRMED', 'CHECKED_IN', 50.00, 50.00, 0)`,
           [t.teamId, t.name, t.college, t.captain, t.email, t.phone, t.code]
         );
       } else {
         await connection.query(
           `UPDATE teams 
-           SET team_name = ?, college_name = ?, captain_name = ?, access_code = ?, registration_status = 'CONFIRMED', check_in_status = 'CHECKED_IN', starting_purse = 100.00, remaining_purse = 100.00, players_bought = 0, is_online = FALSE, support_requested = FALSE 
+           SET team_name = ?, college_name = ?, captain_name = ?, access_code = ?, registration_status = 'CONFIRMED', check_in_status = 'CHECKED_IN', starting_purse = 50.00, remaining_purse = 50.00, players_bought = 0, is_online = FALSE, support_requested = FALSE 
            WHERE team_id = ?`,
           [t.name, t.college, t.captain, t.code, t.teamId]
         );
       }
     }
-    console.log(`[SEED-50] Ensured ${starterTeams.length} confirmed teams with ₹100 Cr purse.`);
+    console.log(`[SEED-50] Ensured ${starterTeams.length} confirmed teams with ₹50 Cr purse.`);
 
     // 4. Create authoritative active auction session
     const [sessionResult] = await connection.query<ResultSetHeader>(

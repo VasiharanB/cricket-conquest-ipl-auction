@@ -131,10 +131,13 @@ export interface AuctionResultsPayload {
   publishedAt: string | null;
   rules?: {
     REQUIRED_PLAYERS: number;
-    REQUIRED_BATSMEN: number;
-    REQUIRED_BOWLERS: number;
-    REQUIRED_ALLROUNDERS: number;
-    REQUIRED_FOREIGN: number;
+    MIN_BATSMEN?: number;
+    REQUIRED_BATSMEN?: number;
+    MIN_BOWLERS?: number;
+    REQUIRED_BOWLERS?: number;
+    MIN_ALLROUNDERS?: number;
+    REQUIRED_ALLROUNDERS?: number;
+    REQUIRED_FOREIGN?: number;
     MAX_FOREIGN: number;
     STARTING_PURSE: number;
   };

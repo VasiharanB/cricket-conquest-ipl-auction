@@ -290,6 +290,7 @@ export const ParticipantAuctionRoom: React.FC = () => {
             timerSeconds={timerSeconds}
             isPaused={stageState === 'PAUSED'}
             hideRating={true}
+            hideTimer={true}
           />
 
           {/* Right Bid Feed */}
@@ -310,7 +311,7 @@ export const ParticipantAuctionRoom: React.FC = () => {
             )}
           </div>
           <span className="part-dock-purse">
-            Remaining Purse: ₹{profile.remainingPurse.toFixed(2)} Cr · Squad: {profile.squad.length}/15
+            Remaining Purse: ₹{profile.remainingPurse.toFixed(2)} Cr · Squad: {profile.squad.length}/15 (Min: 15)
           </span>
         </div>
 

@@ -1,5 +1,7 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { Timer } from 'lucide-react';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface AuctionTimerProps {
   seconds: number;
@@ -12,6 +14,17 @@ export const AuctionTimer: React.FC<AuctionTimerProps> = ({
   totalDuration = 15,
   isPaused = false,
 }) => {
+  const location = useLocation();
+  const { user } = useAuth();
+
+  // The timer MUST be visible ONLY from Admin/Organizer side, NEVER on participant side
+  const isParticipantPage = location.pathname.includes('/participant');
+  const isOrganizerSide = location.pathname.startsWith('/organizer');
+  const isAdminOrAuctioneer = user?.role === 'Admin' || user?.role === 'Auctioneer';
+
+  if (isParticipantPage || !isOrganizerSide || !isAdminOrAuctioneer) {
+    return null;
+  }
   const isUrgent = seconds <= 5 && seconds > 0;
   const isZero = seconds === 0;
 

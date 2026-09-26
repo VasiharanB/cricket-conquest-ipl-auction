@@ -8,6 +8,7 @@ interface CurrentBidProps {
   basePrice?: number;
   timerSeconds: number;
   isPaused?: boolean;
+  hideTimer?: boolean;
 }
 
 export const CurrentBid: React.FC<CurrentBidProps> = ({
@@ -15,6 +16,7 @@ export const CurrentBid: React.FC<CurrentBidProps> = ({
   basePrice = 0,
   timerSeconds,
   isPaused = false,
+  hideTimer = false,
 }) => {
   const [displayAmount, setDisplayAmount] = useState(amount);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -45,6 +47,8 @@ export const CurrentBid: React.FC<CurrentBidProps> = ({
   const diffFromBase = Math.max(0, crAmount - crBase);
   const multiplier = crBase > 0 ? (crAmount / crBase).toFixed(1) : '1.0';
 
+  const isParticipantView = hideTimer || (typeof window !== 'undefined' && window.location.pathname.includes('/participant'));
+
   return (
     <div className="current-bid-stage">
       <div className="current-bid-stage__header">
@@ -53,8 +57,8 @@ export const CurrentBid: React.FC<CurrentBidProps> = ({
           <span className="current-bid-stage__label">CURRENT BID</span>
         </div>
 
-        {/* Timer is integrated seamlessly into top-right of bid hero */}
-        <AuctionTimer seconds={timerSeconds} isPaused={isPaused} />
+        {/* Timer is integrated seamlessly into top-right of bid hero (strictly hidden for participants) */}
+        {!isParticipantView && <AuctionTimer seconds={timerSeconds} isPaused={isPaused} />}
       </div>
 
       <div className={`current-bid-stage__amount-wrap ${isAnimating ? 'current-bid-stage__amount-wrap--animating' : ''}`}>

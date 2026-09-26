@@ -95,7 +95,7 @@ export class BiddingService {
     }
 
     // 5. Squad composition limits
-    const maxSquadSize = process.env.MAX_SQUAD_SIZE ? Number(process.env.MAX_SQUAD_SIZE) : 11;
+    const maxSquadSize = process.env.MAX_SQUAD_SIZE ? Number(process.env.MAX_SQUAD_SIZE) : 15;
     if (playersBought >= maxSquadSize) {
       const err: any = new Error(`Team '${team.team_name}' has already reached the maximum squad limit of ${maxSquadSize} players`);
       err.statusCode = 400;
@@ -136,7 +136,7 @@ export class BiddingService {
     }
 
     // 8. Squad Feasibility Check
-    const minSquadSize = process.env.MIN_SQUAD_SIZE ? Number(process.env.MIN_SQUAD_SIZE) : 5;
+    const minSquadSize = process.env.MIN_SQUAD_SIZE ? Number(process.env.MIN_SQUAD_SIZE) : 15;
     const minBasePrice = 0.20; // 20 Lakhs min base price
     const slotsNeededAfterThis = Math.max(0, minSquadSize - (playersBought + 1));
     const minReserveNeeded = slotsNeededAfterThis * minBasePrice;

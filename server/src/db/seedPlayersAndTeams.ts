@@ -43,24 +43,36 @@ export async function seedPlayersAndTeams(): Promise<void> {
   const [teamCount] = await pool.query<RowDataPacket[]>('SELECT COUNT(*) AS count FROM teams');
   if (Number(teamCount[0]?.count || 0) < 4) {
     const starterTeams = [
-      { id: 'CC26-001', name: 'Royal Strikers', college: 'PSG Tech', captain: 'Arun Kumar', email: 'arun@psg.edu', phone: '9876543210' },
-      { id: 'CC26-002', name: 'Mumbai Warriors', college: 'CIT', captain: 'Rahul Menon', email: 'rahul@cit.edu', phone: '9876543211' },
-      { id: 'CC26-003', name: 'Chennai Kings', college: 'SKCET', captain: 'Karthik Raja', email: 'karthik@skcet.edu', phone: '9876543212' },
-      { id: 'CC26-004', name: 'Delhi Titans', college: 'KCT', captain: 'Siddharth Iyer', email: 'siddharth@kct.edu', phone: '9876543213' },
+      { id: 'CC26-001', name: 'Chennai Super Kings', college: 'IPL Franchise - Chennai', captain: 'N. Srinivasan', email: 'srinivasan@csk.com', phone: '9876543001', code: 'CC26-CSK-2026' },
+      { id: 'CC26-002', name: 'Mumbai Indians', college: 'IPL Franchise - Mumbai', captain: 'Mukesh Ambani', email: 'ambani@mi.com', phone: '9876543002', code: 'CC26-MI-2026' },
+      { id: 'CC26-003', name: 'Royal Challengers Bengaluru', college: 'IPL Franchise - Bengaluru', captain: 'Aryaman Birla', email: 'birla@rcb.com', phone: '9876543003', code: 'CC26-RCB-2026' },
+      { id: 'CC26-004', name: 'Kolkata Knight Riders', college: 'IPL Franchise - Kolkata', captain: 'Shah Rukh Khan', email: 'srk@kkr.com', phone: '9876543004', code: 'CC26-KKR-2026' },
+      { id: 'CC26-005', name: 'Sunrisers Hyderabad', college: 'IPL Franchise - Hyderabad', captain: 'Kalanithi Maran', email: 'maran@srh.com', phone: '9876543005', code: 'CC26-SRH-2026' },
+      { id: 'CC26-006', name: 'Rajasthan Royals', college: 'IPL Franchise - Rajasthan', captain: 'Lakshmi Mittal', email: 'mittal@rr.com', phone: '9876543006', code: 'CC26-RR-2026' },
+      { id: 'CC26-007', name: 'Delhi Capitals', college: 'IPL Franchise - Delhi', captain: 'Parth Jindal', email: 'jindal@dc.com', phone: '9876543007', code: 'CC26-DC-2026' },
+      { id: 'CC26-008', name: 'Punjab Kings', college: 'IPL Franchise - Punjab', captain: 'Preity Zinta', email: 'preity@pbks.com', phone: '9876543008', code: 'CC26-PBKS-2026' },
+      { id: 'CC26-009', name: 'Gujarat Titans', college: 'IPL Franchise - Gujarat', captain: 'Torrent Group', email: 'torrent@gt.com', phone: '9876543009', code: 'CC26-GT-2026' },
+      { id: 'CC26-010', name: 'Lucknow Super Giants', college: 'IPL Franchise - Lucknow', captain: 'Sanjiv Goenka', email: 'goenka@lsg.com', phone: '9876543010', code: 'CC26-LSG-2026' },
     ];
 
     for (const t of starterTeams) {
       const [existing] = await pool.query<RowDataPacket[]>('SELECT id FROM teams WHERE team_id = ?', [t.id]);
       if (existing.length === 0) {
-        const accessCode = `CC26-${t.id.replace(/[^a-zA-Z0-9]/g, '').slice(-4)}-${Math.floor(1000 + Math.random() * 9000)}`;
-        await pool.query(
+        const [insertRes]: any = await pool.query(
           `INSERT INTO teams 
            (team_id, team_name, college_name, captain_name, captain_email, captain_phone, access_code, registration_status, check_in_status, starting_purse, remaining_purse, players_bought) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, 'CONFIRMED', 'CHECKED_IN', 100.00, 100.00, 0)`,
-          [t.id, t.name, t.college, t.captain, t.email, t.phone, accessCode]
+           VALUES (?, ?, ?, ?, ?, ?, ?, 'CONFIRMED', 'CHECKED_IN', 50.00, 50.00, 0)`,
+          [t.id, t.name, t.college, t.captain, t.email, t.phone, t.code]
+        );
+        const teamPk = insertRes.insertId;
+        await pool.query(
+          `INSERT INTO team_members 
+           (team_id, member_number, full_name, email, phone, is_captain) 
+           VALUES (?, 1, ?, ?, ?, TRUE)`,
+          [teamPk, t.captain, t.email, t.phone]
         );
       }
     }
-    console.log('[SEED] Ensured starter auction teams exist in database.');
+    console.log('[SEED] Ensured 10 official IPL teams exist in database.');
   }
 }

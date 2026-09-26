@@ -544,9 +544,9 @@ export const TeamsManagement: React.FC = () => {
                 {/* Squad Progress */}
                 <div className="team-detail__section">
                   <ProgressBar
-                    label="Squad Progress"
+                    label="Squad Progress (Min 15)"
                     value={selectedTeam.playersBought}
-                    max={11}
+                    max={15}
                     color="blue"
                   />
                 </div>

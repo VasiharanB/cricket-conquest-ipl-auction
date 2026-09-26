@@ -6,12 +6,12 @@ import './LandingPage.css';
 
 const rules = [
   'Each team consists of 2–4 registered student participants.',
-  'Total auction purse per team is strictly ₹80.00 Crore (exceeding purse results in immediate disqualification).',
-  'Each team must acquire exactly 11 players in their final squad.',
-  'Required Squad Combination: 5 Batsmen / Wicketkeepers, 3 Bowlers, and 3 All-rounders (5 + 3 + 3 = 11).',
-  'Overseas Quota: Maximum 4 Foreign players per team (4 Overseas + 7 Indian = 11 players).',
+  'Total auction purse per team is strictly ₹50.00 Crore (exceeding purse results in immediate disqualification).',
+  'Each team must acquire exactly 15 players in their final squad.',
+  'Squad Role Minimums: Minimum 5 Batsmen / Wicketkeepers, Minimum 3 Bowlers, and Minimum 3 All-rounders (remaining 4 picks of any role to complete 15 players).',
+  'Overseas Quota: Maximum 4 Foreign players per team.',
   'Capped and uncapped players have no limit — choose any tier to optimize your strategy.',
-  'Elimination Policy: Any team failing to satisfy this exact 11-player combination is eliminated from championship contention.',
+  'Elimination Policy: Any team failing to satisfy these minimum role requirements or exceeding purse/overseas limits is eliminated from championship contention.',
   'Championship Decision: The team with the highest Secret Key Points among qualified squads wins the tournament. Tiebreak is decided by lowest purse spent.',
 ];
 

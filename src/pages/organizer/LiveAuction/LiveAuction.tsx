@@ -17,10 +17,16 @@ import type { AuctionPlayer, AuctionTeam, AuctionUIState, LiveBid } from './type
 import './LiveAuction.css';
 
 const DEFAULT_TEAMS: AuctionTeam[] = [
-  { id: 'CC26-001', name: 'Royal Strikers', college: 'PSG Tech', startingPurse: 100, remainingPurse: 100, playersBought: 0, color: '#3B82F6', accentColor: '#3B82F6' },
-  { id: 'CC26-002', name: 'Mumbai Warriors', college: 'CIT', startingPurse: 100, remainingPurse: 100, playersBought: 0, color: '#0284C7', accentColor: '#0284C7' },
-  { id: 'CC26-003', name: 'Chennai Kings', college: 'SKCET', startingPurse: 100, remainingPurse: 100, playersBought: 0, color: '#EAB308', accentColor: '#EAB308' },
-  { id: 'CC26-004', name: 'Delhi Titans', college: 'KCT', startingPurse: 100, remainingPurse: 100, playersBought: 0, color: '#6366F1', accentColor: '#6366F1' },
+  { id: 'CC26-001', name: 'Chennai Super Kings', college: 'IPL Franchise - Chennai', startingPurse: 50, remainingPurse: 50, playersBought: 0, color: '#FDB913', accentColor: '#0081E9' },
+  { id: 'CC26-002', name: 'Mumbai Indians', college: 'IPL Franchise - Mumbai', startingPurse: 50, remainingPurse: 50, playersBought: 0, color: '#004BA0', accentColor: '#D1AB3E' },
+  { id: 'CC26-003', name: 'Royal Challengers Bengaluru', college: 'IPL Franchise - Bengaluru', startingPurse: 50, remainingPurse: 50, playersBought: 0, color: '#EC1C24', accentColor: '#000000' },
+  { id: 'CC26-004', name: 'Kolkata Knight Riders', college: 'IPL Franchise - Kolkata', startingPurse: 50, remainingPurse: 50, playersBought: 0, color: '#3A225D', accentColor: '#D4AF37' },
+  { id: 'CC26-005', name: 'Sunrisers Hyderabad', college: 'IPL Franchise - Hyderabad', startingPurse: 50, remainingPurse: 50, playersBought: 0, color: '#F26522', accentColor: '#000000' },
+  { id: 'CC26-006', name: 'Rajasthan Royals', college: 'IPL Franchise - Rajasthan', startingPurse: 50, remainingPurse: 50, playersBought: 0, color: '#EA1B86', accentColor: '#254AA5' },
+  { id: 'CC26-007', name: 'Delhi Capitals', college: 'IPL Franchise - Delhi', startingPurse: 50, remainingPurse: 50, playersBought: 0, color: '#17479E', accentColor: '#D71920' },
+  { id: 'CC26-008', name: 'Punjab Kings', college: 'IPL Franchise - Punjab', startingPurse: 50, remainingPurse: 50, playersBought: 0, color: '#DD1F2D', accentColor: '#DDA835' },
+  { id: 'CC26-009', name: 'Gujarat Titans', college: 'IPL Franchise - Gujarat', startingPurse: 50, remainingPurse: 50, playersBought: 0, color: '#1B2133', accentColor: '#C0A062' },
+  { id: 'CC26-010', name: 'Lucknow Super Giants', college: 'IPL Franchise - Lucknow', startingPurse: 50, remainingPurse: 50, playersBought: 0, color: '#0057E7', accentColor: '#F15C22' },
 ];
 
 export const LiveAuction: React.FC = () => {

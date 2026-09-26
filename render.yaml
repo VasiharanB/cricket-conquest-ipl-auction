@@ -17,11 +17,11 @@ services:
       - key: JWT_EXPIRES_IN
         value: 24h
       - key: DEFAULT_PURSE
-        value: "80.00"
+        value: "50.00"
       - key: MIN_SQUAD_SIZE
-        value: "11"
+        value: "15"
       - key: MAX_SQUAD_SIZE
-        value: "11"
+        value: "15"
       - key: MAX_TEAMS
         value: "40"
       - key: DB_SSL

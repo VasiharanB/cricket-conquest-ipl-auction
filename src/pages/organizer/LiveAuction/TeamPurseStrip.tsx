@@ -24,7 +24,7 @@ export const TeamPurseStrip: React.FC<TeamPurseStripProps> = ({
       <div className="team-purse-strip__scroll">
         {teams.map((team) => {
           const isHighest = team.name.toLowerCase() === highestBidderName.toLowerCase();
-          const starting = team.startingPurse || 100;
+          const starting = team.startingPurse || 50;
           const pct = Math.round((team.remainingPurse / starting) * 100);
           const initials = team.name
             .split(' ')

@@ -4,10 +4,10 @@ export const results: TeamResult[] = [
   {
     rank: 1,
     teamId: 'CC26-002',
-    teamName: 'Mumbai Warriors',
+    teamName: 'Mumbai Indians',
     squadRating: 92,
     totalSpent: 78.5,
-    remainingPurse: 21.5,
+    remainingPurse: 1.5,
     players: [
       { playerId: 'P002', playerName: 'Jasprit Bumrah', role: 'Bowler', boughtFor: 16.5 },
       { playerId: 'P005', playerName: 'Rohit Sharma', role: 'Batsman', boughtFor: 14 },
@@ -22,10 +22,10 @@ export const results: TeamResult[] = [
   {
     rank: 2,
     teamId: 'CC26-001',
-    teamName: 'Royal Strikers',
+    teamName: 'Chennai Super Kings',
     squadRating: 89,
     totalSpent: 58,
-    remainingPurse: 42,
+    remainingPurse: 22,
     players: [
       { playerId: 'P001', playerName: 'Virat Kohli', role: 'Batsman', boughtFor: 15 },
       { playerId: 'P010', playerName: 'KL Rahul', role: 'Wicketkeeper', boughtFor: 10 },
@@ -38,11 +38,11 @@ export const results: TeamResult[] = [
   },
   {
     rank: 3,
-    teamId: 'CC26-004',
-    teamName: 'Delhi Titans',
+    teamId: 'CC26-007',
+    teamName: 'Delhi Capitals',
     squadRating: 87,
     totalSpent: 65,
-    remainingPurse: 35,
+    remainingPurse: 15,
     players: [
       { playerId: 'P009', playerName: 'David Warner', role: 'Batsman', boughtFor: 13 },
       { playerId: 'P004', playerName: 'Rishabh Pant', role: 'Wicketkeeper', boughtFor: 12 },
@@ -56,7 +56,7 @@ export const results: TeamResult[] = [
   {
     rank: 4,
     teamId: 'CC26-003',
-    teamName: 'Chennai Kings',
+    teamName: 'Royal Challengers Bengaluru',
     squadRating: 85,
     totalSpent: 62,
     remainingPurse: 38,

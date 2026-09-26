@@ -148,23 +148,30 @@ export const ParticipantLoginPage: React.FC = () => {
             <button
               type="button"
               className="part-chip"
-              onClick={() => handleQuickFill('CC26-007', 'CC26-GRCB-8881')}
+              onClick={() => handleQuickFill('CC26-001', 'CC26-CSK-2026')}
             >
-              RCB (CC26-007)
+              CSK (CC26-001)
             </button>
             <button
               type="button"
               className="part-chip"
-              onClick={() => handleQuickFill('CC26-008', 'CC26-CHEN-9841')}
+              onClick={() => handleQuickFill('CC26-002', 'CC26-MI-2026')}
             >
-              Chennai Super Kings (CC26-008)
+              MI (CC26-002)
             </button>
             <button
               type="button"
               className="part-chip"
-              onClick={() => handleQuickFill('CC26-010', 'CC26-SHAM-1206')}
+              onClick={() => handleQuickFill('CC26-003', 'CC26-RCB-2026')}
             >
-              Mumbai Indians (CC26-010)
+              RCB (CC26-003)
+            </button>
+            <button
+              type="button"
+              className="part-chip"
+              onClick={() => handleQuickFill('CC26-004', 'CC26-KKR-2026')}
+            >
+              KKR (CC26-004)
             </button>
           </div>
         </div>

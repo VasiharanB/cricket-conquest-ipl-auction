@@ -249,7 +249,7 @@ export class TeamService {
    */
   static async createTeam(input: CreateTeamInput): Promise<DbTeam> {
     const maxTeams = process.env.MAX_TEAMS ? Number(process.env.MAX_TEAMS) : 16;
-    const defaultPurse = process.env.DEFAULT_PURSE ? Number(process.env.DEFAULT_PURSE) : 80.00;
+    const defaultPurse = process.env.DEFAULT_PURSE ? Number(process.env.DEFAULT_PURSE) : 50.00;
 
     // 1. Validation: Team & College Name
     const teamName = (input.teamName || '').trim();

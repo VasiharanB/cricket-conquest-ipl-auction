@@ -285,10 +285,10 @@ export const ParticipantDashboard: React.FC = () => {
           <div className="part-stat-card">
             <span className="part-stat-label">Players Acquired</span>
             <span className="part-stat-value">
-              {profile.squad.length} <span style={{ fontSize: 16, color: '#64748B' }}>/ 11</span>
+              {profile.squad.length} <span style={{ fontSize: 16, color: '#64748B' }}>/ 15</span>
             </span>
-            <span style={{ fontSize: 12, color: profile.squad.length === 11 ? '#00F59B' : '#F59E0B' }}>
-              {profile.squad.length === 11 ? '✓ Squad Limit Reached' : `Target: Exactly 11 Players`}
+            <span style={{ fontSize: 12, color: profile.squad.length >= 15 ? '#00F59B' : '#F59E0B' }}>
+              {profile.squad.length >= 15 ? '✓ Minimum Limit (15) Reached' : `Minimum Limit: 15 Players`}
             </span>
           </div>
 
@@ -298,7 +298,7 @@ export const ParticipantDashboard: React.FC = () => {
               ₹{(profile.startingPurse - profile.remainingPurse).toFixed(2)} Cr
             </span>
             <span style={{ fontSize: 12, color: '#64748B' }}>
-              Budget Limit: ₹80.00 Cr
+              Budget Limit: ₹{profile.startingPurse ? profile.startingPurse.toFixed(2) : '50.00'} Cr
             </span>
           </div>
 
@@ -324,8 +324,9 @@ export const ParticipantDashboard: React.FC = () => {
           const foreign = squad.filter(p => (p.nationality || '').trim().toLowerCase() !== 'indian').length;
           const totalSpent = profile.startingPurse - profile.remainingPurse;
 
-          const isComplete = squad.length === 11;
-          const isValid = isComplete && bat === 5 && bowl === 3 && all === 3 && foreign === 4 && totalSpent <= 80;
+          const isComplete = squad.length === 15;
+          const meetsRoleRequirements = bat >= 5 && bowl >= 3 && all >= 3 && foreign <= 4 && totalSpent <= (profile.startingPurse || 50);
+          const isValid = isComplete && meetsRoleRequirements;
 
           return (
             <div style={{
@@ -350,55 +351,55 @@ export const ParticipantDashboard: React.FC = () => {
                   </span>
                 ) : isComplete ? (
                   <span style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#F87171', border: '1px solid #EF4444', padding: '3px 12px', borderRadius: 999, fontSize: 12, fontWeight: 800 }}>
-                    ❌ ELIMINATION RISK: Role Quota Mismatch
+                    ❌ ELIMINATION RISK: Minimum Role Requirements Not Met
                   </span>
                 ) : (
                   <span style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', border: '1px solid #F59E0B', padding: '3px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700 }}>
-                    ⚡ IN PROGRESS: Need {11 - squad.length} More Players
+                    ⚡ IN PROGRESS: Need {Math.max(0, 15 - squad.length)} More Players (Minimum Limit: 15)
                   </span>
                 )}
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8 }}>
                 <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
-                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Squad Size (11)</span>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: squad.length === 11 ? '#00F59B' : '#F8FAFC', marginTop: 2 }}>
-                    {squad.length} / 11 {squad.length === 11 ? '✓' : ''}
+                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Min Squad Limit (15)</span>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: squad.length >= 15 ? '#00F59B' : '#F8FAFC', marginTop: 2 }}>
+                    {squad.length} / 15 {squad.length >= 15 ? '✓' : ''}
                   </div>
                 </div>
 
                 <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
-                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Batsmen/WK (5)</span>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: bat === 5 ? '#00F59B' : '#38BDF8', marginTop: 2 }}>
-                    {bat} / 5 {bat === 5 ? '✓' : ''}
+                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Batsmen/WK (Min 5)</span>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: bat >= 5 ? '#00F59B' : '#38BDF8', marginTop: 2 }}>
+                    {bat} / 5 {bat >= 5 ? '✓' : ''}
                   </div>
                 </div>
 
                 <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
-                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Bowlers (3)</span>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: bowl === 3 ? '#00F59B' : '#38BDF8', marginTop: 2 }}>
-                    {bowl} / 3 {bowl === 3 ? '✓' : ''}
+                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Bowlers (Min 3)</span>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: bowl >= 3 ? '#00F59B' : '#38BDF8', marginTop: 2 }}>
+                    {bowl} / 3 {bowl >= 3 ? '✓' : ''}
                   </div>
                 </div>
 
                 <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
-                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>All-Rounders (3)</span>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: all === 3 ? '#00F59B' : '#A855F7', marginTop: 2 }}>
-                    {all} / 3 {all === 3 ? '✓' : ''}
+                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>All-Rounders (Min 3)</span>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: all >= 3 ? '#00F59B' : '#A855F7', marginTop: 2 }}>
+                    {all} / 3 {all >= 3 ? '✓' : ''}
                   </div>
                 </div>
 
                 <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
-                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Foreign (4)</span>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: foreign === 4 ? '#00F59B' : foreign > 4 ? '#F87171' : '#F59E0B', marginTop: 2 }}>
-                    {foreign} / 4 {foreign === 4 ? '✓' : ''}
+                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Foreign (Max 4)</span>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: foreign <= 4 ? '#00F59B' : '#F87171', marginTop: 2 }}>
+                    {foreign} / 4 {foreign <= 4 ? '✓' : '⚠️'}
                   </div>
                 </div>
 
                 <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
-                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Purse (₹80 Cr)</span>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: totalSpent <= 80 ? '#00F59B' : '#F87171', marginTop: 2 }}>
-                    ₹{totalSpent.toFixed(1)} Cr {totalSpent <= 80 ? '✓' : '⚠️'}
+                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Purse (₹{profile.startingPurse ? profile.startingPurse.toFixed(0) : '50'} Cr)</span>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: totalSpent <= (profile.startingPurse || 50) ? '#00F59B' : '#F87171', marginTop: 2 }}>
+                    ₹{totalSpent.toFixed(1)} Cr {totalSpent <= (profile.startingPurse || 50) ? '✓' : '⚠️'}
                   </div>
                 </div>
               </div>
@@ -410,13 +411,13 @@ export const ParticipantDashboard: React.FC = () => {
         <div style={{ background: 'rgba(13, 23, 42, 0.7)', borderRadius: 20, border: '1px solid rgba(255, 255, 255, 0.08)', overflow: 'hidden' }}>
           <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>Your Acquired Squad & Playing Order</h2>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>Your Acquired Squad & Lineup Order</h2>
               <p style={{ margin: '4px 0 0', fontSize: 13, color: '#94A3B8' }}>
-                Position your players in the exact batting and playing XI order you want using the ▲ Up and ▼ Down buttons.
+                Position your 15 squad players in your preferred batting and lineup order (1–15) using the ▲ Up and ▼ Down buttons.
               </p>
             </div>
             <span style={{ fontSize: 13, color: '#00F59B', fontWeight: 700, background: 'rgba(0, 245, 155, 0.1)', padding: '4px 12px', borderRadius: 999 }}>
-              {profile.squad.length} Players
+              {profile.squad.length} / 15 Players (Minimum: 15)
             </span>
           </div>
 
@@ -434,7 +435,7 @@ export const ParticipantDashboard: React.FC = () => {
             </thead>
             <tbody>
               {sortedSquad.map((p, idx) => {
-                const isPlayingXI = idx < 11;
+                const isSquadMember = idx < 15;
                 return (
                   <tr key={p.id}>
                     <td>
@@ -447,12 +448,12 @@ export const ParticipantDashboard: React.FC = () => {
                           borderRadius: 6,
                           fontSize: 12,
                           fontWeight: 800,
-                          background: isPlayingXI ? 'rgba(0, 245, 155, 0.15)' : 'rgba(148, 163, 184, 0.12)',
-                          color: isPlayingXI ? '#00F59B' : '#94A3B8',
-                          border: isPlayingXI ? '1px solid rgba(0, 245, 155, 0.3)' : '1px solid rgba(148, 163, 184, 0.2)',
+                          background: isSquadMember ? 'rgba(0, 245, 155, 0.15)' : 'rgba(148, 163, 184, 0.12)',
+                          color: isSquadMember ? '#00F59B' : '#94A3B8',
+                          border: isSquadMember ? '1px solid rgba(0, 245, 155, 0.3)' : '1px solid rgba(148, 163, 184, 0.2)',
                         }}
                       >
-                        #{idx + 1} {isPlayingXI ? '(Playing XI)' : '(Bench)'}
+                        #{idx + 1} {isSquadMember ? '(Squad Pick)' : '(Reserve)'}
                       </span>
                     </td>
                     <td style={{ fontFamily: 'monospace', color: '#00F59B' }}>{p.player_id}</td>

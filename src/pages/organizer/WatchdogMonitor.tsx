@@ -236,7 +236,7 @@ export const WatchdogMonitor: React.FC = () => {
                   </td>
                   <td>
                     <div style={{ fontWeight: 700 }}>₹{t.remainingPurse.toFixed(2)} Cr</div>
-                    <div style={{ fontSize: 11, color: '#94A3B8' }}>{t.playersBought} Players</div>
+                    <div style={{ fontSize: 11, color: '#94A3B8' }}>{t.playersBought} / 15 Players (Min: 15)</div>
                   </td>
                   <td>
                     {t.supportRequested ? (

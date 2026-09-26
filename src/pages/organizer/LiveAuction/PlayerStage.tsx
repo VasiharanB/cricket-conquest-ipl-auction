@@ -16,6 +16,7 @@ interface PlayerStageProps {
   timerSeconds: number;
   isPaused: boolean;
   hideRating?: boolean;
+  hideTimer?: boolean;
 }
 
 export const PlayerStage: React.FC<PlayerStageProps> = ({
@@ -28,6 +29,7 @@ export const PlayerStage: React.FC<PlayerStageProps> = ({
   timerSeconds,
   isPaused,
   hideRating = false,
+  hideTimer = false,
 }) => {
   return (
     <section className="auction-player-stage">
@@ -58,6 +60,7 @@ export const PlayerStage: React.FC<PlayerStageProps> = ({
               basePrice={player?.basePrice ?? 0}
               timerSeconds={timerSeconds}
               isPaused={isPaused}
+              hideTimer={hideTimer}
             />
 
             {/* Highest Bidder Team Info */}

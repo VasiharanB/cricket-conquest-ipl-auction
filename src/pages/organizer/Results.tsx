@@ -223,31 +223,31 @@ export const Results: React.FC = () => {
         }}>
           <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
             <span style={{ fontSize: 11, color: '#94A3B8', display: 'block', textTransform: 'uppercase' }}>Squad Size</span>
-            <strong style={{ fontSize: 15, color: '#F8FAFC' }}>👥 Exactly 11</strong>
+            <strong style={{ fontSize: 15, color: '#F8FAFC' }}>👥 Exactly 15</strong>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
             <span style={{ fontSize: 11, color: '#94A3B8', display: 'block', textTransform: 'uppercase' }}>Batsmen / WK</span>
-            <strong style={{ fontSize: 15, color: '#38BDF8' }}>🏏 Exactly 5</strong>
+            <strong style={{ fontSize: 15, color: '#38BDF8' }}>🏏 Min 5</strong>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
             <span style={{ fontSize: 11, color: '#94A3B8', display: 'block', textTransform: 'uppercase' }}>Bowlers</span>
-            <strong style={{ fontSize: 15, color: '#00F59B' }}>🎯 Exactly 3</strong>
+            <strong style={{ fontSize: 15, color: '#00F59B' }}>🎯 Min 3</strong>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
             <span style={{ fontSize: 11, color: '#94A3B8', display: 'block', textTransform: 'uppercase' }}>All-Rounders</span>
-            <strong style={{ fontSize: 15, color: '#A855F7' }}>⚡ Exactly 3</strong>
+            <strong style={{ fontSize: 15, color: '#A855F7' }}>⚡ Min 3</strong>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
             <span style={{ fontSize: 11, color: '#94A3B8', display: 'block', textTransform: 'uppercase' }}>Foreign Players</span>
-            <strong style={{ fontSize: 15, color: '#F59E0B' }}>✈️ 4 Players</strong>
+            <strong style={{ fontSize: 15, color: '#F59E0B' }}>✈️ Max 4</strong>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
             <span style={{ fontSize: 11, color: '#94A3B8', display: 'block', textTransform: 'uppercase' }}>Auction Purse</span>
-            <strong style={{ fontSize: 15, color: '#E2E8F0' }}>💰 ₹80.00 Cr Max</strong>
+            <strong style={{ fontSize: 15, color: '#E2E8F0' }}>💰 ₹50.00 Cr Max</strong>
           </div>
         </div>
         <p style={{ margin: '4px 0 0', fontSize: 12, color: '#94A3B8', lineHeight: 1.5 }}>
-          * Capped & Uncapped players have <strong>no limit</strong>. Only teams whose squad satisfies this complete combination can win the Championship. Teams failing any rule are placed in the Eliminated bracket.
+          * Minimum requirements: At least 5 Batsmen/WKs, 3 Bowlers, and 3 All-Rounders, with maximum 4 Foreign players. Total squad size must be 15 players. Teams failing any rule are placed in the Eliminated bracket.
         </p>
       </div>
 
@@ -287,7 +287,7 @@ export const Results: React.FC = () => {
               </div>
               <div className="podium__stat">
                 <span className="podium__stat-label">Players</span>
-                <span className="podium__stat-value">{runnerUp.players.length} / 11</span>
+                <span className="podium__stat-value">{runnerUp.players.length} / 15</span>
               </div>
             </div>
           )}
@@ -364,7 +364,7 @@ export const Results: React.FC = () => {
               </div>
               <div className="podium__stat">
                 <span className="podium__stat-label">Players</span>
-                <span className="podium__stat-value">{third.players.length} / 11</span>
+                <span className="podium__stat-value">{third.players.length} / 15</span>
               </div>
             </div>
           )}
@@ -392,7 +392,7 @@ export const Results: React.FC = () => {
                 <th>Team</th>
                 <th>Rule Book Status</th>
                 <th>Squad Breakdown</th>
-                <th>Purse Left (₹80 Cr)</th>
+                <th>Purse Left (₹50 Cr)</th>
                 <th>Key Points 🔑</th>
                 <th>Final Score</th>
               </tr>
@@ -432,6 +432,21 @@ export const Results: React.FC = () => {
                           }}>
                             ✓ QUALIFIED
                           </span>
+                        ) : !isPublished && r.players.length < 15 && (r.roleCounts.foreign ?? 0) <= 4 && r.remainingPurse >= 0 ? (
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            background: 'rgba(245, 158, 11, 0.15)',
+                            color: '#F59E0B',
+                            border: '1px solid #F59E0B',
+                            padding: '3px 10px',
+                            borderRadius: 999,
+                            fontWeight: 800,
+                            fontSize: 11,
+                          }}>
+                            ⚡ IN PROGRESS ({r.players.length}/15)
+                          </span>
                         ) : (
                           <span style={{
                             display: 'inline-flex',
@@ -452,12 +467,12 @@ export const Results: React.FC = () => {
                       <td>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 12 }}>
                           <div>
-                            <strong style={{ color: r.players.length === 11 ? '#00F59B' : '#F87171' }}>{r.players.length}</strong> / 11 Players
+                            <strong style={{ color: r.players.length === 15 ? '#00F59B' : '#F87171' }}>{r.players.length}</strong> / 15 Players
                             <span style={{ color: '#64748B', margin: '0 4px' }}>·</span>
-                            <span style={{ color: (r.roleCounts.foreign ?? 0) === 4 ? '#00F59B' : '#F59E0B' }}>{r.roleCounts.foreign ?? 0} Foreign</span>
+                            <span style={{ color: (r.roleCounts.foreign ?? 0) <= 4 ? '#00F59B' : '#F87171' }}>{r.roleCounts.foreign ?? 0}/4 Foreign</span>
                           </div>
                           <div style={{ color: '#94A3B8', fontSize: 11 }}>
-                            {r.roleCounts.batsman}/5 Bat · {r.roleCounts.bowler}/3 Bowl · {r.roleCounts.allRounder}/3 All
+                            {r.roleCounts.batsman} Bat (Min 5) · {r.roleCounts.bowler} Bowl (Min 3) · {r.roleCounts.allRounder} All (Min 3)
                           </div>
                         </div>
                       </td>
@@ -488,7 +503,33 @@ export const Results: React.FC = () => {
                         )}
                       </td>
                     </tr>
-                    {!isValid && violations.length > 0 && (
+                    {!isValid && !isPublished && r.players.length < 15 && (r.roleCounts.foreign ?? 0) <= 4 && r.remainingPurse >= 0 ? (
+                      <tr style={{ background: 'rgba(245, 158, 11, 0.04)' }}>
+                        <td colSpan={7} style={{ padding: '6px 20px', fontSize: 11, color: '#FCD34D', borderTop: 'none' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                            <strong style={{ color: '#F59E0B' }}>Live Auction Progress:</strong>
+                            <span style={{ background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '2px 8px', borderRadius: 4 }}>
+                              Need {15 - r.players.length} more picks to complete 15-player squad
+                            </span>
+                            {r.roleCounts.batsman < 5 && (
+                              <span style={{ background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '2px 8px', borderRadius: 4, color: '#38BDF8' }}>
+                                Needs {5 - r.roleCounts.batsman} more Batsmen/WK (Min 5)
+                              </span>
+                            )}
+                            {r.roleCounts.bowler < 3 && (
+                              <span style={{ background: 'rgba(0, 245, 155, 0.15)', border: '1px solid rgba(0, 245, 155, 0.3)', padding: '2px 8px', borderRadius: 4, color: '#00F59B' }}>
+                                Needs {3 - r.roleCounts.bowler} more Bowlers (Min 3)
+                              </span>
+                            )}
+                            {r.roleCounts.allRounder < 3 && (
+                              <span style={{ background: 'rgba(168, 85, 247, 0.15)', border: '1px solid rgba(168, 85, 247, 0.3)', padding: '2px 8px', borderRadius: 4, color: '#C084FC' }}>
+                                Needs {3 - r.roleCounts.allRounder} more All-rounders (Min 3)
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ) : !isValid && violations.length > 0 && (
                       <tr style={{ background: 'rgba(239, 68, 68, 0.05)' }}>
                         <td colSpan={7} style={{ padding: '6px 20px', fontSize: 11, color: '#FCA5A5', borderTop: 'none' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
@@ -534,7 +575,7 @@ export const Results: React.FC = () => {
                     <div style={{ marginTop: 4 }}>
                       {isValid ? (
                         <span style={{ fontSize: 11, color: '#00F59B', fontWeight: 700 }}>
-                          ✓ QUALIFIED (5 Bat · 3 Bowl · 3 All · 4 Foreign)
+                          ✓ QUALIFIED (Min 5 Bat · Min 3 Bowl · Min 3 All · Max 4 Foreign · 15 Squad)
                         </span>
                       ) : (
                         <span style={{ fontSize: 11, color: '#F87171', fontWeight: 700 }}>
