@@ -324,8 +324,8 @@ export const ParticipantDashboard: React.FC = () => {
           const foreign = squad.filter(p => (p.nationality || '').trim().toLowerCase() !== 'indian').length;
           const totalSpent = profile.startingPurse - profile.remainingPurse;
 
-          const isComplete = squad.length === 15;
-          const meetsRoleRequirements = bat >= 5 && bowl >= 3 && all >= 3 && foreign <= 4 && totalSpent <= (profile.startingPurse || 50);
+          const isComplete = squad.length >= 15;
+          const meetsRoleRequirements = bat >= 5 && bowl >= 3 && all >= 3 && foreign >= 4 && totalSpent <= (profile.startingPurse || 50);
           const isValid = isComplete && meetsRoleRequirements;
 
           return (
@@ -390,9 +390,9 @@ export const ParticipantDashboard: React.FC = () => {
                 </div>
 
                 <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
-                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Foreign (Max 4)</span>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: foreign <= 4 ? '#00F59B' : '#F87171', marginTop: 2 }}>
-                    {foreign} / 4 {foreign <= 4 ? '✓' : '⚠️'}
+                  <span style={{ fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>Foreign (Min 4)</span>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: foreign >= 4 ? '#00F59B' : '#F59E0B', marginTop: 2 }}>
+                    {foreign} / 4 {foreign >= 4 ? '✓' : ''}
                   </div>
                 </div>
 

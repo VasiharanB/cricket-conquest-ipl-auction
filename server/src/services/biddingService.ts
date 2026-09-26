@@ -94,8 +94,8 @@ export class BiddingService {
       throw err;
     }
 
-    // 5. Squad composition limits
-    const maxSquadSize = process.env.MAX_SQUAD_SIZE ? Number(process.env.MAX_SQUAD_SIZE) : 15;
+    // 5. Squad composition limits (minimum is 15 players, maximum ceiling is 25)
+    const maxSquadSize = process.env.MAX_SQUAD_SIZE ? Number(process.env.MAX_SQUAD_SIZE) : 25;
     if (playersBought >= maxSquadSize) {
       const err: any = new Error(`Team '${team.team_name}' has already reached the maximum squad limit of ${maxSquadSize} players`);
       err.statusCode = 400;

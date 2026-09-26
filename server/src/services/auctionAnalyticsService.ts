@@ -17,15 +17,17 @@ export interface HistoryItem {
 }
 
 export const TOURNAMENT_RULES = {
-  REQUIRED_PLAYERS: 15,
+  MIN_PLAYERS: 15,       // Minimum 15 players required
+  REQUIRED_PLAYERS: 15,  // For backward compatibility
   MIN_BATSMEN: 5,        // Minimum 5 (Batsman + Wicketkeeper)
   REQUIRED_BATSMEN: 5,   // For backward compatibility
   MIN_BOWLERS: 3,        // Minimum 3
   REQUIRED_BOWLERS: 3,   // For backward compatibility
   MIN_ALLROUNDERS: 3,    // Minimum 3
   REQUIRED_ALLROUNDERS: 3, // For backward compatibility
-  REQUIRED_FOREIGN: 4,   // Max 4 foreign players allowed
-  MAX_FOREIGN: 4,
+  MIN_FOREIGN: 4,        // Minimum 4 foreign players required
+  REQUIRED_FOREIGN: 4,   // For backward compatibility
+  MAX_FOREIGN: 25,       // High ceiling (not restricted to 4)
   STARTING_PURSE: 50.0,  // ₹50.00 Cr
 };
 
@@ -232,12 +234,10 @@ export class AuctionAnalyticsService {
       // ── Official Rule Book Compliance Check ──
       const violations: string[] = [];
 
-      // 1. Total players: exactly 15
-      const totalPlayersPassed = players.length === TOURNAMENT_RULES.REQUIRED_PLAYERS;
-      if (players.length < TOURNAMENT_RULES.REQUIRED_PLAYERS) {
-        violations.push(`Incomplete Squad: 15 players required (currently has ${players.length})`);
-      } else if (players.length > TOURNAMENT_RULES.REQUIRED_PLAYERS) {
-        violations.push(`Squad Limit Exceeded: Exactly 15 players allowed (currently has ${players.length})`);
+      // 1. Total players: minimum 15
+      const totalPlayersPassed = players.length >= TOURNAMENT_RULES.MIN_PLAYERS;
+      if (players.length < TOURNAMENT_RULES.MIN_PLAYERS) {
+        violations.push(`Insufficient Squad: Minimum 15 players required (currently has ${players.length})`);
       }
 
       // 2. Batsmen: minimum 5 (Batsmen + Wicketkeepers)
@@ -258,10 +258,10 @@ export class AuctionAnalyticsService {
         violations.push(`Insufficient All-rounders: Minimum 3 required (currently has ${allRounderCount})`);
       }
 
-      // 5. Foreign players: maximum 4
-      const foreignPassed = foreignCount <= TOURNAMENT_RULES.MAX_FOREIGN;
-      if (foreignCount > TOURNAMENT_RULES.MAX_FOREIGN) {
-        violations.push(`Overseas Limit Exceeded: Maximum 4 allowed (currently has ${foreignCount})`);
+      // 5. Foreign players: minimum 4
+      const foreignPassed = foreignCount >= TOURNAMENT_RULES.MIN_FOREIGN;
+      if (foreignCount < TOURNAMENT_RULES.MIN_FOREIGN) {
+        violations.push(`Insufficient Overseas Players: Minimum 4 required (currently has ${foreignCount})`);
       }
 
       // 6. Purse Limit: 50 Cr (cannot exceed starting purse)
@@ -276,11 +276,11 @@ export class AuctionAnalyticsService {
       const ruleEvaluation: SquadRuleEvaluation = {
         isValid,
         isEliminated,
-        totalPlayers: { current: players.length, required: TOURNAMENT_RULES.REQUIRED_PLAYERS, passed: totalPlayersPassed },
+        totalPlayers: { current: players.length, required: TOURNAMENT_RULES.MIN_PLAYERS, passed: totalPlayersPassed },
         batsmen: { current: batsmanTotalCount, required: TOURNAMENT_RULES.MIN_BATSMEN, passed: batsmenPassed },
         bowlers: { current: bowlerCount, required: TOURNAMENT_RULES.MIN_BOWLERS, passed: bowlersPassed },
         allRounders: { current: allRounderCount, required: TOURNAMENT_RULES.MIN_ALLROUNDERS, passed: allRoundersPassed },
-        foreignPlayers: { current: foreignCount, required: TOURNAMENT_RULES.MAX_FOREIGN, passed: foreignPassed },
+        foreignPlayers: { current: foreignCount, required: TOURNAMENT_RULES.MIN_FOREIGN, passed: foreignPassed },
         purse: { spent: totalSpent, limit: startingPurse, remaining: calculatedRemaining, passed: pursePassed },
         violations,
       };

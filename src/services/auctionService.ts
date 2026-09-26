@@ -130,6 +130,7 @@ export interface AuctionResultsPayload {
   isPublished: boolean;
   publishedAt: string | null;
   rules?: {
+    MIN_PLAYERS?: number;
     REQUIRED_PLAYERS: number;
     MIN_BATSMEN?: number;
     REQUIRED_BATSMEN?: number;
@@ -137,6 +138,7 @@ export interface AuctionResultsPayload {
     REQUIRED_BOWLERS?: number;
     MIN_ALLROUNDERS?: number;
     REQUIRED_ALLROUNDERS?: number;
+    MIN_FOREIGN?: number;
     REQUIRED_FOREIGN?: number;
     MAX_FOREIGN: number;
     STARTING_PURSE: number;
