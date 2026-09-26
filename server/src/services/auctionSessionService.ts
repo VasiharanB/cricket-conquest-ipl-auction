@@ -66,7 +66,7 @@ export interface LiveAuctionState {
 
 export class AuctionSessionService {
   private static cachedState: { [sessionId: number]: { state: LiveAuctionState; timestamp: number } } = {};
-  private static CACHE_TTL_MS = 750;
+  private static CACHE_TTL_MS = 1500;
 
   /**
    * Invalidate state cache

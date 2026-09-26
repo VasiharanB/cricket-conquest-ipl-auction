@@ -166,19 +166,21 @@ export class AuctionAnalyticsService {
        ORDER BY t.id ASC`
     );
 
-    const standings: TeamResultItem[] = [];
+    // High performance optimization: Batch fetch all active player purchases in ONE query
+    const [allPlayerRows] = await pool.query<RowDataPacket[]>(
+      `SELECT pp.team_id, p.id, p.player_id, p.player_name, p.role, p.nationality, p.player_category, p.rating, p.key_points, pp.purchase_price
+       FROM player_purchases pp
+       JOIN players p ON pp.player_id = p.id
+       WHERE pp.is_undone = FALSE
+       ORDER BY pp.id ASC`
+    );
 
-    for (const t of teamRows) {
-      const [playerRows] = await pool.query<RowDataPacket[]>(
-        `SELECT p.id, p.player_id, p.player_name, p.role, p.nationality, p.player_category, p.rating, p.key_points, pp.purchase_price
-         FROM player_purchases pp
-         JOIN players p ON pp.player_id = p.id
-         WHERE pp.team_id = ? AND pp.is_undone = FALSE
-         ORDER BY pp.id ASC`,
-        [t.id]
-      );
-
-      const players: TeamResultSquadPlayer[] = (playerRows as any[]).map((p) => ({
+    const teamPlayersMap = new Map<number, TeamResultSquadPlayer[]>();
+    for (const p of allPlayerRows as any[]) {
+      if (!teamPlayersMap.has(p.team_id)) {
+        teamPlayersMap.set(p.team_id, []);
+      }
+      teamPlayersMap.get(p.team_id)!.push({
         id: p.player_id,
         name: p.player_name,
         role: p.role,
@@ -187,7 +189,13 @@ export class AuctionAnalyticsService {
         price: Number(p.purchase_price),
         rating: p.rating ? Number(p.rating) : 7.5,
         keyPoints: Number(p.key_points || 0),
-      }));
+      });
+    }
+
+    const standings: TeamResultItem[] = [];
+
+    for (const t of teamRows) {
+      const players: TeamResultSquadPlayer[] = teamPlayersMap.get(t.id) || [];
 
       const totalSpent = players.reduce((sum, p) => sum + p.price, 0);
       const startingPurse = Number(t.starting_purse) || TOURNAMENT_RULES.STARTING_PURSE;

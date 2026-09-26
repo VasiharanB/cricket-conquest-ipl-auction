@@ -22,6 +22,8 @@ services:
         value: "11"
       - key: MAX_SQUAD_SIZE
         value: "11"
+      - key: MAX_TEAMS
+        value: "40"
       - key: DB_SSL
         value: "true"
       # Cloud MySQL connection: set either DATABASE_URL or DB_HOST/DB_USER/DB_PASSWORD/DB_NAME

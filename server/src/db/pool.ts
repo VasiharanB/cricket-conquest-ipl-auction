@@ -1,6 +1,13 @@
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config({ path: path.resolve(process.cwd(), 'server/.env') });
 dotenv.config();
 
 const isSslEnabled = process.env.DB_SSL === 'true' || Boolean(process.env.MYSQL_URL || process.env.DATABASE_URL);
