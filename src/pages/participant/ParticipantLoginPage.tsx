@@ -173,9 +173,6 @@ export const ParticipantLoginPage: React.FC = () => {
           <Link to="/register" style={{ color: '#00F59B', fontSize: 13, textDecoration: 'none', fontWeight: 600 }}>
             Haven't registered your team yet? Register Here →
           </Link>
-          <Link to="/organizer/login" style={{ color: '#64748B', fontSize: 12, textDecoration: 'none' }}>
-            Organizer & Volunteer Login →
-          </Link>
         </div>
       </div>
     </div>
